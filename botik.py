@@ -1,9 +1,10 @@
 from telebot import TeleBot, types
 import json
 #from nltk.stem.snowball import RussianStemmer
-from datetime import datetime, timedelta
+import datetime
 #from fuzzywuzzy import fuzz
 #from fuzzywuzzy import process
+import telebot_calendar
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 bot = TeleBot("7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ")
 SUGGEST_FOOD = 'Что покушать можно?'
@@ -23,8 +24,11 @@ CONTINUE = 'Продолжить'
 SKIP = 'Пропустить этот пункт'
 APPLY = 'Сохранить'
 
+
+
 # Состояние пользователя
 USER_STATE = {}
+USER_STACK = []
 
 def create_dish_categories(filename):
     dish_categories = {}
@@ -69,7 +73,7 @@ filename = 'dishes.txt'  # Путь к вашему файлу с данными
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
 calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
-now = datetime.now()
+now = datetime.datetime.now()
 
 back_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 back_markup.add(types.KeyboardButton(BACK))
@@ -126,8 +130,8 @@ with open(file, "w", encoding="utf-8") as f:
 product_name = ""
 categories = []
 source = "Магазин"
-m_date = datetime.today()
-e_date = datetime.today()
+m_date = datetime.date.today()
+e_date = datetime.date.today()
 weight = 0
 t_weight = 0
 
@@ -151,10 +155,11 @@ def send_welcome(message):
     bot.send_message(message.chat.id, "Добро пожаловать в Умный Холодильник Демо Версию! Как говорится, без еды, как без воды - ни туды и ни сюды, так что дожидаемся начала интерактива и заполним же наш холодильник! ", reply_markup=start_markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'adding_weight')
-def callback_handler(call):
-    USER_STATE[call.message.chat.id] = 'waiting_for_weight'
-    bot.send_message(call.message.chat.id, f"Введите вес продукта (просто целое число)", reply_markup=add_weight_markup)
+@bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "categories_entered")
+def weight_asker(message):
+    USER_STATE[message.chat.id] = 'waiting_for_weight'
+    USER_STACK.append(message)
+    bot.send_message(message.chat.id, f"Введите вес продукта (просто целое число в граммах)", reply_markup=add_weight_markup)
 
 
 def edit_cat(message):
@@ -164,10 +169,12 @@ def edit_cat(message):
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "editing_category")
 def after_editing_cats(message):
     try:
-        if message == BACK:
+        if message.text == BACK:
             USER_STATE[message.chat.id] = "adding_categories"
+            get_food_name(USER_STACK.pop())
         else:
             cats = message.text.split(",")
+            USER_STATE[message.chat.id] = "categories_entered"
             bot.send_message(message.chat.id,f"Присвоены следующие категории:\n{cats}", reply_markup=add_cat_markup)
     except Exception as e:
         print (e)
@@ -178,16 +185,20 @@ def after_editing_cats(message):
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_weight")
 def get_food_weight(message):
     try:
-        
-        sint = ignore_exception(ValueError)(int)
-        global weight
-        weight = sint(message.text.split(" ")[0])  # Получаем вес
-        if weight and weight != 0:
-            USER_STATE[message.chat.id] = "waiting_for_tare_weight"  # Переходим к следующему состоянию
-            bot.send_message(message.chat.id, f"Вес продукта: {weight} кг. Теперь укажите вес тары (это необязательно):", reply_markup=add_tare_weight_markup)
+        if message.text == RESET:
+            start_adding_food(message)
+        elif message.text == BACK:
+            weight_asker(USER_STACK.pop())
         else:
-            USER_STATE[message.chat.id] = "waiting_for_source"  # Переходим к следующему состоянию
-            bot.send_message(message.chat.id, f'Вес продукта не указан. Переход к следующему шагу. Кто готовил еду? (по умолчанию это магазин)', reply_markup=add_source_markup)
+            sint = ignore_exception(ValueError)(int)
+            global weight
+            weight = sint(message.text.split(" ")[0])  # Получаем вес
+            if weight and weight != 0:
+                USER_STATE[message.chat.id] = "waiting_for_tare_weight"  # Переходим к следующему состоянию
+                bot.send_message(message.chat.id, f"Вес продукта: {weight} г. Теперь укажите вес тары (это необязательно):", reply_markup=add_tare_weight_markup)
+            else:
+                USER_STATE[message.chat.id] = "waiting_for_source"  # Переходим к следующему состоянию
+                bot.send_message(message.chat.id, f'Вес продукта не указан. Переход к следующему шагу. Кто готовил еду? (по умолчанию это магазин)', reply_markup=add_source_markup)
     except Exception as e:
         print (e)
         bot.send_message(message.chat.id, ERROR, reply_markup=back_markup)
@@ -196,40 +207,55 @@ def get_food_weight(message):
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_tare_weight")
 def get_food_tare_weight(message):
     try:
-        sint = ignore_exception(ValueError)(int)
-        tare_weight = sint(message.text.split(" ")[0])  # Получаем вес тары
-        global t_weight
-        t_weight = tare_weight
-        USER_STATE[message.chat.id] = "waiting_for_source"  # Переходим к следующему состоянию
-        bot.send_message(message.chat.id, f"Вес тары: {tare_weight} кг. Теперь укажите того, кто готовил (по умолчанию установлено, что еда магазинная):", reply_markup=add_source_markup)
+        if message.text == RESET:
+            start_adding_food(message)
+        else:
+            sint = ignore_exception(ValueError)(int)
+            tare_weight = sint(message.text.split(" ")[0])  # Получаем вес тары
+            calced_weight = 0
+            if tare_weight:
+                global t_weight
+                t_weight = tare_weight
+                calced_weight = tare_weight
+            USER_STATE[message.chat.id] = "waiting_for_source"  # Переходим к следующему состоянию
+            bot.send_message(message.chat.id, f"Вес тары: {calced_weight} г. Теперь укажите того, кто готовил (по умолчанию установлено, что еда магазинная):", reply_markup=add_source_markup)
     except Exception as e:
         print (e)
         bot.send_message(message.chat.id, ERROR, reply_markup=back_markup)
 
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_source")
-@bot.callback_query_handler(func=lambda call: call.data == 'adding_source')
 def get_food_source(message):
     global source
-    source = message.text if message.text else "Магазин"  # Используем "Магазин", если поле пустое
-    USER_STATE[message.chat.id] = "waiting_for_manufacture_date"  # Переходим к следующему состоянию
-    bot.send_message(message.chat.id, f"Источник: {source}. Теперь укажите дату изготовления (на календаре):", reply_markup=calendar.create_calendar(
+    if message.text == RESET:
+        start_adding_food(message)
+    else:
+        source = message.text if message.text != CONTINUE else "Магазин"  # Используем "Магазин", если поле пустое
+        USER_STATE[message.chat.id] = "waiting_for_manufacture_date"  # Переходим к следующему состоянию
+        USER_STACK.append(message)
+        bot.send_message(message.chat.id, f"Источник: {source}. Теперь укажите дату изготовления (на календаре):", reply_markup=calendar.create_calendar(
             name=calendar_1.prefix,
             year=now.year,
             month=now.month)
             )
 
-@bot.callback_query_handler(func=lambda call: call.data == 'adding_manufacture_date')
 @bot.callback_query_handler(func=lambda call: call.data.startswith(calendar_1.prefix))
-def get_food_manufacture_date(message):
+def get_food_manufacture_date(call):
     try:
-        manufacture_date = datetime.strptime(message.text, "%d.%m.%Y") if message != SKIP else now # Преобразуем строку в дату
-        global m_date
-        m_date = manufacture_date
-        USER_STATE[message.chat.id] = "waiting_for_expiration_date"  # Переходим к следующему состоянию
-        bot.send_message(message.chat.id, f"Дата изготовления: {manufacture_date.strftime('%d.%m.%Y')}. Сколько хранится продукт? (по умолчанию 3 дня):")
+        name, action, year, month, day = call.data.split(calendar_1.sep)
+        # Processing the calendar. Get either the date or None if the buttons are of a different type
+        chosen_date = datetime.date(year, month, day)
+        # There are additional steps. Let's say if the date DAY is selected, you can execute your code. I sent a message.
+        if action == "DAY":
+            manufacture_date = datetime.strptime(call.message.text, "%d.%m.%Y") if call.message != SKIP else now # Преобразуем строку в дату
+            global m_date
+            m_date = chosen_date
+            USER_STATE[call.message.chat.id] = "waiting_for_expiration_date"  # Переходим к следующему состоянию
+            bot.send_message(call.message.chat.id, f"Дата изготовления: {chosen_date.strftime('%d.%m.%Y')}. Сколько хранится продукт? (по умолчанию 3 дня):")
+        elif action == "CANCEL":
+            get_food_source(USER_STACK.pop())
     except Exception as e:
         print (e)
-        bot.send_message(message.chat.id, ERROR, reply_markup=back_markup)
+        bot.send_message(call.message.chat.id, ERROR, reply_markup=back_markup)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'waiting_for_expiration_date')
 def get_food_exp_date(message):
@@ -255,20 +281,30 @@ def start_adding_food(message):
 
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_name")
 def get_food_name(message):
-    global product_name
-    product_name = message.text  # Получаем название продукта
     try:
-        #cats = find_categories_fuzzy(message.text, dish_categories)
-        cats = ['Соевое мясо', 'Пластилиновый маргарин']
-        msg = ""
-        if len(cats) > 0:
-            msg = f"Для продукта {message.text} автоматически определены категории:\n{cats}\nКатегории можно переписать вручную (формат ввода - через запятую)\n"
+        reserved = [ADD_FOOD, SUGGEST_FOOD, CHECK_EXPIRATION, DELETE_FOOD]
+        global product_name
+        product_name = message.text 
+        if message.text == BACK:
+            handle_message(message)
+            return
+        elif message.text not in reserved:
+            #cats = find_categories_fuzzy(message.text, dish_categories)
+            cats = ['Соевое мясо', 'Пластилиновый маргарин']
+            msg = ""
+            if len(cats) > 0:
+                msg = f"Для продукта {message.text} автоматически определены категории:\n{cats}\nКатегории можно переписать вручную (формат ввода - через запятую)\n"
+            else:
+                msg = f"Не удалось определить категории для продукта {message.text}. Укажите их вручную, если хотите (формат ввода - через запятую)"
+            global categories
+            categories = cats  # Используем найденные категории
+            USER_STATE[message.chat.id] = "categories_entered"
+            USER_STACK.append(message)
+            bot.send_message(message.chat.id, msg, reply_markup=add_cat_markup)
         else:
-            msg = f"Не удалось определить категории для продукта {message.text}. Укажите их вручную, если хотите (формат ввода - через запятую)"
-        global categories
-        categories = cats  # Используем найденные категории
-        bot.send_message(message.chat.id, msg, reply_markup=add_cat_markup)
-        USER_STATE[message.chat.id] = "categories_entered"
+            handle_message(message)
+            return
+        
     except Exception as e:
         print (e)
         bot.send_message(message.chat.id,ERROR, reply_markup=back_markup)
@@ -287,8 +323,6 @@ def handle_message(message):
             start_adding_food(message)
         elif message.text == EDIT_CAT:
             edit_cat(message)
-        elif message.text == CONTINUE and USER_STATE.get(message.chat.id) == "categories_entered":
-            USER_STATE[message.chat.id]='waiting_for_weight'
         else: "Я так не умею :("
     except Exception as e:
         print(e)
@@ -328,7 +362,7 @@ def read_json():
         #for item in fridge_data:
             #print(f"Название продукта: {item['name']}, Срок годности: {item['expiry_date']}")
 
-def insert_data(name, weight, tare_weight=0, source='Магазин', categories=[], man_date=datetime.today(), exp_date=3):
+def insert_data(name, weight, tare_weight=0, source='Магазин', categories=[], man_date=datetime.date.today(), exp_date=3):
     try:
         data = read_json()
         new_item = {
@@ -339,7 +373,7 @@ def insert_data(name, weight, tare_weight=0, source='Магазин', categories
             "net_weight": weight - tare_weight,
             "categories": categories,
             "manufacture_date": man_date.isoformat(),
-            "expiry_date": (man_date + timedelta(days=exp_date)).isoformat()
+            "expiry_date": (man_date + datetime.timedelta(days=exp_date)).isoformat()
             #"ingredients": ingredients
         }
         data.append(new_item)
