@@ -1,9 +1,9 @@
 from telebot import TeleBot, types
 import json
-from nltk.stem.snowball import RussianStemmer
+#from nltk.stem.snowball import RussianStemmer
 from datetime import datetime, timedelta
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
+#from fuzzywuzzy import fuzz
+#from fuzzywuzzy import process
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 bot = TeleBot("7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ")
 SUGGEST_FOOD = 'Что покушать можно?'
@@ -64,7 +64,7 @@ def find_categories_fuzzy(dish_name, dish_categories, threshold=50, limit=5):
 #database - json
 file = 'fridge_data.json'
 filename = 'dishes.txt'  # Путь к вашему файлу с данными
-dish_categories = create_dish_categories(filename)
+#dish_categories = create_dish_categories(filename)
 
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
@@ -77,33 +77,33 @@ back_markup.add(types.KeyboardButton(BACK))
 start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 c1 = types.KeyboardButton(SUGGEST_FOOD)
 c2 = types.KeyboardButton(CHECK_EXPIRATION)
-c3 = types.InlineKeyboardButton(ADD_FOOD, callback_data='adding_food')
+c3 = types.KeyboardButton(ADD_FOOD)
 c4 = types.KeyboardButton(DELETE_FOOD)
 start_markup.add(c1, c2, c4, c3)
 
 add_cat_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c1 = types.InlineKeyboardButton(EDIT_CAT, callback_data="editing_category")
-c2= types.InlineKeyboardButton(CONTINUE, callback_data="adding_weight")
+c1 = types.KeyboardButton(EDIT_CAT)
+c2= types.KeyboardButton(CONTINUE)#--> weight
 reset = types.KeyboardButton(RESET)
 add_cat_markup.add(c1,c2,reset)
 
 add_weight_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c2= types.InlineKeyboardButton(SKIP, callback_data="adding_source")
+c2= types.KeyboardButton(SKIP) #to source
 reset = types.KeyboardButton(RESET)
 add_weight_markup.add(c2,reset)
 
 add_tare_weight_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c2= types.InlineKeyboardButton(SKIP, callback_data="adding_source")
+c2= types.KeyboardButton(SKIP)#to source
 reset = types.KeyboardButton(RESET)
 add_tare_weight_markup.add(c2,reset)
 
 add_source_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c2= types.InlineKeyboardButton(CONTINUE, callback_data="adding_manufacture_date")
+c2= types.KeyboardButton(CONTINUE)#to man date
 reset = types.KeyboardButton(RESET)
 add_source_markup.add(c2, reset)
 
 add_date_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c2= types.InlineKeyboardButton(CONTINUE, callback_data="adding_expiration_date")
+c2= types.KeyboardButton(CONTINUE) #to exp date
 reset = types.KeyboardButton(RESET)
 add_date_markup.add(c2,reset)
 
@@ -113,7 +113,7 @@ reset = types.KeyboardButton(RESET)
 add_exp_date_markup.add(c2,reset)
 
 check_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-c2= types.InlineKeyboardButton(APPLY, callback_data="applying")
+c2= types.KeyboardButton(APPLY)
 reset = types.KeyboardButton(RESET)
 check_markup.add(c2,reset)
 
@@ -151,21 +151,28 @@ def send_welcome(message):
     bot.send_message(message.chat.id, "Добро пожаловать в Умный Холодильник Демо Версию! Как говорится, без еды, как без воды - ни туды и ни сюды, так что дожидаемся начала интерактива и заполним же наш холодильник! ", reply_markup=start_markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'adding__weight')
+@bot.callback_query_handler(func=lambda call: call.data == 'adding_weight')
 def callback_handler(call):
     USER_STATE[call.message.chat.id] = 'waiting_for_weight'
     bot.send_message(call.message.chat.id, f"Введите вес продукта (просто целое число)", reply_markup=add_weight_markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'editing_category')
-def callback_handler(call):
+def edit_cat(message):
+    USER_STATE[message.chat.id] = "editing_category"  # Переходим к следующему состоянию
+    bot.send_message(message.chat.id, "Введите категории самостоятельно через запятую", reply_markup=back_markup)
+
+@bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "editing_category")
+def after_editing_cats(message):
     try:
-        cats = call.message.text.split(",")
-        bot.send_message(call.message.chat.id,f"Присвоены следующие категории:\n{cats}", reply_markup=add_cat_markup)
+        if message == BACK:
+            USER_STATE[message.chat.id] = "adding_categories"
+        else:
+            cats = message.text.split(",")
+            bot.send_message(message.chat.id,f"Присвоены следующие категории:\n{cats}", reply_markup=add_cat_markup)
     except Exception as e:
         print (e)
-        bot.send_message(call.message.chat.id,ERROR, reply_markup=back_markup)
-    
+        bot.send_message(message.chat.id,ERROR, reply_markup=back_markup)
+
         
 
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_weight")
@@ -246,14 +253,13 @@ def start_adding_food(message):
     except Exception as e:
         print(e)
 
-
-
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id) == "waiting_for_name")
 def get_food_name(message):
     global product_name
     product_name = message.text  # Получаем название продукта
     try:
-        cats = find_categories_fuzzy(message.text, dish_categories)
+        #cats = find_categories_fuzzy(message.text, dish_categories)
+        cats = ['Соевое мясо', 'Пластилиновый маргарин']
         msg = ""
         if len(cats) > 0:
             msg = f"Для продукта {message.text} автоматически определены категории:\n{cats}\nКатегории можно переписать вручную (формат ввода - через запятую)\n"
@@ -262,6 +268,7 @@ def get_food_name(message):
         global categories
         categories = cats  # Используем найденные категории
         bot.send_message(message.chat.id, msg, reply_markup=add_cat_markup)
+        USER_STATE[message.chat.id] = "categories_entered"
     except Exception as e:
         print (e)
         bot.send_message(message.chat.id,ERROR, reply_markup=back_markup)
@@ -278,6 +285,10 @@ def handle_message(message):
             bot.send_message(message.chat.id, "Выберите опцию:", reply_markup=start_markup)
         elif message.text == ADD_FOOD or message.text == RESET:
             start_adding_food(message)
+        elif message.text == EDIT_CAT:
+            edit_cat(message)
+        elif message.text == CONTINUE and USER_STATE.get(message.chat.id) == "categories_entered":
+            USER_STATE[message.chat.id]='waiting_for_weight'
         else: "Я так не умею :("
     except Exception as e:
         print(e)
