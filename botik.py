@@ -1,6 +1,5 @@
 import traceback
 import uuid
-import fridge_item
 from telebot import TeleBot, types
 import json
 import datetime
