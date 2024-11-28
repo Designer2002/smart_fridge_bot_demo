@@ -1,4 +1,4 @@
-from json_database import read_json
+from utils.database import read_json
 from markups import create_product_markup
 def edit_product_message(bot, product_id, new_text):
     product = read_json().get(product_id)

@@ -1,3 +1,6 @@
+from config import dishes, interactive
+from utils.database import load_registration_sessions, read_json
+
 def create_dish_categories(filename):
     dish_categories = {}
     with open(filename, 'r', encoding='utf-8') as file:
@@ -13,4 +16,8 @@ def create_dish_categories(filename):
                 dish_categories[dish_name] = {"all_info": all_info, "categories": categories}
     return dish_categories
 
-dishes = 'dishes.txt'  # Путь к вашему файлу с данными
+dish_categories = create_dish_categories(dishes)
+
+initial_state = read_json(interactive).get("interactive_started", False)
+
+load_registration_sessions()

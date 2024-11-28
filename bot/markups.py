@@ -10,7 +10,7 @@ def create_product_markup(product_id):
 
 
 admin_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-admin_markup.add("Сообщение от датчика веса", "Рандомный продукт")
+admin_markup.add("Сообщение от датчика веса", "Рандомный продукт", "Начать интерактив")
 
 start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 start_markup.add("Новый продукт", "Найди просрочку", "Посоветуй вкусняшку", "Удалить продукт")
