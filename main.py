@@ -1,217 +1,19 @@
-from rx import create, operators as ops
-from rx.subject import Subject
-import random
-import re
+from config import *
+from utils import find_categories_fuzzy, find_emoji_fuzzy, get_random_weight
+from rx import operators as ops
 import uuid
 from telebot import TeleBot, types
-import json
 import datetime
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
-from nltk.stem.snowball import RussianStemmer
-from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 
-admin_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-admin_markup.add("Сообщение от датчика веса", "Рандомный продукт")
-admin_id = '699861867'
+from telebot import TeleBot
 
 
-bot = TeleBot("7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ")
-calendar = Calendar(language=RUSSIAN_LANGUAGE)
-calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
-
-# Глобальные переменные
-USER_STATE = {}  # Хранит данные о состоянии пользователя
+bot = TeleBot(bot_token)
 
 
-products_stream = Subject()
-
-new_products = "new_products.json"
-fridge = 'fridge_data.json'
-users = "users.json"
-
-# Клавиатуры
-start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-start_markup.add("Новый продукт", "Найди просрочку", "Посоветуй вкусняшку", "Удалить продукт")
-
-drop_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-drop_markup.add("1", "3", "5", "10", "15", "20")
 
 
-back_skip_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-back_skip_markup.add("Назад", "Пропустить")
 
-check_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-check_markup.add("Сохранить", "Сброс")
-
-CATEGORY_EMOJIS = {
-    "овощ": "🥦",    # Овощи
-    "молоч": "🥛",   # Молочные продукты (поиск по подстроке "молоч")
-    "мясо": "🍖",     # Мясо
-    "рыба": "🐟",     # Рыба
-    "фрукт": "🍎",   # Фрукты
-    "выпечка": "🥐",  # Выпечка
-    "хлеб": "🥐",  # Выпечка
-    "прочее": "🍽️"   # Прочее
-}
-
-CATEGORY_PATTERNS = {
-    "овощ": r'\bовощ(и|ной|ная|ное|ные|)\b',    # Овощи
-    "молоч": r'\bмолоч(ный|ные|ное|)\b',            # Молочные продукты
-    "мясо": r'\bмяс(о|ные|ной|ное|)\b',             # Мясо
-    "рыба": r'\bрыб(а|ы|ное|ные|)\b',               # Рыба
-    "фрукт": r'\bфрукт(овый|ы|)\b',             # Фрукты
-    "выпечка": r'\bвыпеч(ка|ки|ные|)\b',        # Выпечка
-    "хлеб": r'\bхлеб(ный|ные|ное|ная|)\b',          # Хлеб
-}
-
-def write_json(file, data):
-    try:
-        # Преобразуем все даты в строки формата ISO
-        for product in data:
-            if isinstance(product.get("manufacture_date"), datetime.date):
-                product["manufacture_date"] = product["manufacture_date"].isoformat()
-            if isinstance(product.get("expiry_date"), datetime.date):
-                product["expiry_date"] = product["expiry_date"].isoformat()
-        
-        # Сохраняем JSON
-        with open(file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-    except Exception as e:
-        print(f"Ошибка записи JSON: {e}")
-
-def read_new_products():
-    try:
-        with open(new_products, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Ошибка в json: {e}")
-        return {}
-
-def get_category_emoji(categories):
-    # Ищем подходящий смайлик для первой категории
-    for category in categories:
-        category_lower = category.lower()
-        
-        # Проверка для каждой категории с помощью регулярных выражений
-        for key, pattern in CATEGORY_PATTERNS.items():
-            if re.search(pattern, category_lower):  # Ищем по паттерну в категории
-                return CATEGORY_EMOJIS[key]
-    
-    return "🍽️"  # По умолчанию смайлик для прочего
-
-def create_dish_categories(filename):
-    dish_categories = {}
-    with open(filename, 'r', encoding='utf-8') as file:
-        for line in file:
-            # Убираем лишние пробелы и разделяем строку по ';'
-            row = line.strip().split(';')
-            if len(row) == 3:
-                dish_name = row[0].strip()  # Название блюда
-                categories = row[1].strip()  # Категории
-                synonyms = row[2].strip()  # Синонимы
-                # Объединяем название и синонимы в строку для поиска
-                all_info = f"{dish_name}, {synonyms}"
-                dish_categories[dish_name] = {"all_info": all_info, "categories": categories}
-    return dish_categories
-
-# Функция для поиска категорий с использованием fuzzywuzzy
-from fuzzywuzzy import fuzz, process
-from nltk.stem.snowball import RussianStemmer
-
-def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
-    # Пройдем по всем блюдам и используем fuzzywuzzy для поиска наиболее похожих
-    stemmer = RussianStemmer()
-    stemmed_dish_name = stemmer.stem(dish_name)
-    matches = process.extract(
-        stemmed_dish_name,
-        [info["all_info"] for info in dish_categories.values()],
-        scorer=fuzz.partial_ratio,
-        limit=limit
-    )
-
-    # Учитываем длину строки
-    def length_adjusted_score(match):
-        match_text, score = match
-        length_difference = abs(len(stemmed_dish_name) - len(match_text))
-        # Уменьшаем оценку за большое расхождение в длине
-        adjusted_score = score - length_difference
-        return adjusted_score
-
-    # Отсортируем по скорректированным оценкам
-    matches = sorted(matches, key=length_adjusted_score, reverse=True)
-
-    # Пройдем по всем результатам и фильтруем по порогу схожести
-    for match in matches:
-        best_match_info, score = match
-        if score >= threshold:
-            # Найдем ключ блюда, которое соответствует найденной строке
-            best_match_dish = [dish for dish, info in dish_categories.items() if info["all_info"] == best_match_info][0]
-            return dish_categories[best_match_dish]["categories"]
-
-    return []
-
-#database - json
-file = 'fridge_data.json'
-filename = 'dishes.txt'  # Путь к вашему файлу с данными
-dish_categories = create_dish_categories(filename)
-
-# Функции работы с данными
-def read_json():
-    try:
-        with open(file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            # Преобразуем строки ISO обратно в объекты date
-            for product in data:
-                if product.get("manufacture_date"):
-                    product["manufacture_date"] = datetime.date.fromisoformat(product["manufacture_date"])
-                if product.get("expiry_date"):
-                    product["expiry_date"] = datetime.date.fromisoformat(product["expiry_date"])
-            return data
-    except Exception as e:
-        print(f"Ошибка чтения JSON: {e}")
-        return []
-
-def write_products(data):
-    try:
-        with open(new_products, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-    except Exception as e:
-        print(f"Ошибка записи продуктов: {e}")
-
-
-# Добавление нового продукта
-def start_adding_food(message):
-    product_id = str(uuid.uuid4())  # Уникальный ID
-    USER_STATE[message.chat.id] = {
-        "state": "waiting_for_name",
-        "product": {
-            "id": product_id,
-            "name": "",
-            "categories" : [],
-            "weight": 0,  # По умолчанию
-            "tare_weight": 0,  # По умолчанию
-            "source": "Магазин",  # По умолчанию
-            "manufacture_date": datetime.date.today(),  # По умолчанию - сегодня
-            "expiry_date": None,
-        }
-    }
-    bot.send_message(message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
-
-def check_user_state(state=True):
-    def decorator(func):
-        def wrapper(message, *args, **kwargs):
-            user_data = read_users()  # Читаем данные пользователей из файла
-            user_id = str(message.from_user.id)  # Приводим идентификатор пользователя к строке
-            if user_id in user_data:
-                if user_data[user_id].get('enabled') == state:
-                    return func(message, *args, **kwargs)  # Выполняем основную функцию
-                else:
-                    bot.send_message(message.chat.id, "Ваш аккаунт не активирован.")
-            else:
-                bot.send_message(message.chat.id, "Пока не нажмёте /start, работать не будет.")
-        return wrapper
-    return decorator
 
 
 @bot.message_handler(func=lambda message: USER_STATE.get(message.chat.id, {}).get("state") == "waiting_for_name")
@@ -333,7 +135,7 @@ def get_summary(product, category_emoji, title):
     )
 
 def send_product_summary(chat_id, product):
-    category_emoji = get_category_emoji(product["categories"])
+    category_emoji = find_emoji_fuzzy(product["categories"])
     summary = get_summary(product,category_emoji, title="📝 **Проверьте данные продукта:**\n")
     bot.send_message(chat_id, summary, parse_mode="Markdown", reply_markup=check_markup)
 
@@ -390,7 +192,7 @@ def notify_others_about_product(product_id, registering_user_id):
     # Исключаем регистрирующего пользователя
     user_ids = [user_id for user_id in user_ids if user_id != registering_user_id]
     # Текст сообщения
-    product_info = get_summary(product,get_category_emoji(product["categories"]), title=f"✅ Новый продукт добавлен в базу!\n")
+    product_info = get_summary(product,find_emoji_fuzzy(product["categories"]), title=f"✅ Новый продукт добавлен в базу!\n")
 
     # Отправляем сообщение всем остальным пользователям
     for user_id in user_ids:
@@ -452,33 +254,7 @@ def write_users(data):
     except Exception as e:
         print(f"Ошибка записи пользователей: {e}")
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    user_id = str(message.from_user.id)
-    first_name = message.from_user.first_name
-    last_name = message.from_user.last_name
-    username = message.from_user.username
 
-    display_name = f"{first_name} {last_name}".strip() if last_name else first_name
-
-    user_data = read_users()
-    if user_id not in user_data:
-        user_data[user_id] = {
-            "enabled": True,
-            "display_name": display_name,
-            "username": username or "Без ника",
-            "state" : ""
-        }
-        write_users(user_data)
-
-    if int(user_id) == int(admin_id):
-        bot.send_message(message.chat.id, "Режим админа включен", reply_markup=admin_markup)
-    else:
-        bot.send_message(
-            message.chat.id, 
-            "Добро пожаловать в Умный Холодильник Демо Версию!",
-            reply_markup=start_markup
-        )
 
 @bot.message_handler(func=lambda message: message.text == "Сообщение от датчика веса")
 @check_user_state()
@@ -508,24 +284,6 @@ def add_new_weight_change(weight, chat_id):
 
     return product_id
 
-def edit_product_message(product_id, new_text):
-    product = read_new_products().get(product_id)
-    if product and product["message_id"]:
-        bot.edit_message_text(
-            chat_id=product["chat_id"],
-            message_id=product["message_id"],
-            text=new_text,
-            reply_markup=create_product_markup(product_id)
-        )
-
-def create_product_markup(product_id):
-    markup = types.InlineKeyboardMarkup()
-    button = types.InlineKeyboardButton(
-        text="Зарегистрировать продукт",
-        callback_data=f"register:{product_id}"
-    )
-    markup.add(button)
-    return markup
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("register:"))
 def register_product(call):
@@ -564,7 +322,7 @@ def drop_food(message):
     num = int(message.text)
     products = read_new_products()
     for _ in range(num):
-        random_weight = random.randint(100, 1100)
+        random_weight = get_random_weight(100,1100)
         product_id = add_new_weight_change(random_weight, message.chat.id)
         msg = (
         "📦 ***Обнаружен новый продукт!***\n\n"
@@ -657,15 +415,7 @@ products_stream.pipe(
 )
 
 
-def notify_and_delete_expired_product(product_id, product):
-    if product:
-        # Удаляем продукт из хранилища
-        
-        product.remove(product["product_id"])
-        write_products(product)
 
-        # Редактируем сообщение об этом продукте
-        edit_product_message(product_id, "💤 Уже неактуально - прошло слишком много времени")
 
 products_stream.pipe(
     # Фильтрация событий для редактирования сообщений
@@ -679,4 +429,6 @@ products_stream.pipe(
     ops.filter(lambda event: event[0] is not None),
 ).subscribe(lambda event: edit_product_message(event[0], "✅ Продукт успешно зарегистрирован!"))
 
-bot.polling()
+if __name__ == "__main__":
+    print("Бот запущен...")
+    bot.polling()
