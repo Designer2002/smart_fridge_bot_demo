@@ -1,3 +1,4 @@
+import configparser
 import datetime
 from functools import lru_cache
 from random import randint
@@ -6,8 +7,6 @@ from fuzzywuzzy import fuzz, process
 from nltk.stem.snowball import RussianStemmer
 from bot.editors import edit_product_message
 from bot.emoji import CATEGORY_NAMES, CATEGORY_EMOJIS
-from utils.database import read_json, write_json
-from config import new_products, users, products_stream, registration_sessions
 from bot.markups import back_skip_markup, check_markup
 
 def find_emoji_fuzzy(dish_name, threshold=70):
@@ -66,6 +65,7 @@ def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
 def check_user_state(state=True):
     def decorator(bot, func):
         async def wrapper(message, *args, **kwargs):
+            from my_utils.database import read_json
             user_data = read_json()  # Читаем данные пользователей из файла
             user_id = str(message.from_user.id)  # Приводим идентификатор пользователя к строке
             if user_id in user_data:
@@ -87,6 +87,7 @@ def check_if_correct_data(data):
     return data
 
 def notify_and_delete_expired_product(product_id, product):
+    from my_utils.database import write_json
     if product:
         # Удаляем продукт из хранилища
         
@@ -97,6 +98,9 @@ def notify_and_delete_expired_product(product_id, product):
         edit_product_message(product_id, "💤 Уже неактуально - прошло слишком много времени")
 
 def add_new_weight_change(weight, chat_id):
+    from config import new_products
+    from event_handlers import products_stream
+    from my_utils.database import read_json, write_json
     product_id = str(uuid.uuid4())
     timestamp = datetime.datetime.now()
     products = read_json(new_products)
@@ -117,6 +121,7 @@ def add_new_weight_change(weight, chat_id):
 
 # Добавление нового продукта
 async def start_adding_food(bot, message):
+    from message_handler import registration_sessions
     product_id = str(uuid.uuid4())  # Уникальный ID
     registration_sessions[message.chat.id] = {
         "state": "waiting_for_name",
@@ -134,6 +139,8 @@ async def start_adding_food(bot, message):
     await bot.send_message(message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
 
 async def notify_others_about_product(bot, product_id, registering_user_id):
+        from config import new_products, users
+        from my_utils.database import read_json
         product = read_json(new_products).get(product_id)
         if not product:
             return  # Продукт уже удален или не существует
@@ -173,3 +180,35 @@ async def send_product_summary(bot, chat_id, product):
     category_emoji = find_emoji_fuzzy(product["categories"])
     summary = get_summary(product,category_emoji, title="📝 **Проверьте данные продукта:**\n")
     await bot.send_message(chat_id, summary, parse_mode="Markdown", reply_markup=check_markup)
+
+def create_config():
+    # Создаем объект ConfigParser
+    config = configparser.ConfigParser()
+    
+    # Добавляем данные без секций
+    config['DEFAULT'] = {
+        'admin_id': '699861867',
+        'bot_token': "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
+        'sessions_file': 'registration_sessions.json',
+        'fridge': 'data/fridge_data.json',
+        'users': 'data/users.json',
+        'new_products': 'data/new_products.json',
+        'interactive': 'state.json',
+        'dishes': 'data/dishes.txt'
+    }
+    
+    # Записываем конфигурацию в файл
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
+def read_config():
+    # Создаем объект ConfigParser
+    config = configparser.ConfigParser()
+
+    # Читаем конфигурацию из файла
+    config.read('config.ini')
+
+    # Преобразуем данные в словарь
+    config_data = dict(config['DEFAULT'])
+
+    return config_data

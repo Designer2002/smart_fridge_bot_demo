@@ -1,15 +1,23 @@
 import datetime
 import signal
 from rx import operators as ops
-from utils.database import read_json, write_json
-from config import products_stream, interactive_state, interactive, new_products, shutdown_stream
+from my_utils.database import read_json, write_json
+import config
 from editors import edit_product_message
-from utils.helpers import notify_and_delete_expired_product
+from my_utils.helpers import notify_and_delete_expired_product
+from rx.subject import Subject, BehaviorSubject
+import my_utils.data_loaders
+import message_handler
 
+
+shutdown_stream = Subject()
+interactive_state = BehaviorSubject(my_utils.data_loaders.initial_state)
+user_start_events = BehaviorSubject({})
+products_stream = Subject()
 
 # Поток событий для удаления устаревших продуктов
 products_stream.pipe(
-    ops.map(lambda event: (event[0], read_json(new_products).get(event[0]))),  
+    ops.map(lambda event: (event[0], read_json(config.new_products).get(event[0]))),  
     ops.filter(lambda event: event[1] is not None),
     ops.filter(lambda event: (datetime.datetime.now() - datetime.datetime.fromisoformat(event[1]["timestamp"])).total_seconds() > 86400),
 ).subscribe(
@@ -31,11 +39,15 @@ products_stream.pipe(
 interactive_state.pipe(
     ops.distinct_until_changed()  # Реагируем только на изменение
 ).subscribe(
-    lambda state: write_json(interactive,state)
+    lambda state: write_json(my_utils.data_loaders.config_data['interactive'], f"interactive_started : {state}")
 )
 
 def handle_shutdown_signal(signal_number, frame):
     shutdown_stream.on_next(True)
+    
+shutdown_stream.pipe(
+    ops.distinct_until_changed()  # Реагируем только на изменение
+).subscribe(lambda _: write_json(my_utils.data_loaders.config_data['sessions_file'], message_handler.registration_sessions))
 
 signal.signal(signal.SIGINT, handle_shutdown_signal)
 signal.signal(signal.SIGTERM, handle_shutdown_signal)

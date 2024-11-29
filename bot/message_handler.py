@@ -3,10 +3,14 @@ from telebot.async_telebot import AsyncTeleBot
 from utils.helpers import add_new_weight_change, find_categories_fuzzy, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food
 from bot.markups import back_skip_markup, create_product_markup, start_markup, drop_markup, admin_markup
 from utils.helpers import check_user_state
-from config import interactive_state, new_products, users, fridge, products_stream, dishes, calendar, calendar_1, registration_sessions
 from utils.database import read_json, write_json
+from callbacks import calendar, calendar_1
+from event_handlers import products_stream, interactive_state
+
+registration_sessions = {}
 
 async def handle_messages(bot: AsyncTeleBot):
+    from utils.data_loaders import config_data
     @bot.message_handler(func=lambda message: message.text == "Назад")
     @check_user_state()
     async def go_back(message):
@@ -82,7 +86,7 @@ async def handle_messages(bot: AsyncTeleBot):
             products[product_id]["message_id"] = message.chat.id
 
             # Сохраняем изменения
-            write_json(new_products, products)
+            write_json(config_data["new_products"], products)
 
     @bot.message_handler(func=lambda message: message.text == "Рандомный продукт")
     @check_user_state()
@@ -121,7 +125,7 @@ async def handle_messages(bot: AsyncTeleBot):
     async def suggest_food(message):
         await bot.send_message(message.chat.id, "Эта функция пока не реализована. В будущем вы сможете увидеть рекомендации, что приготовить.")
 
-    @bot.message_handler(func=lambda message: registration_sessions(users).get(message.chat.id, {}).get("state") == "waiting_for_expiration_date")
+    @bot.message_handler(func=lambda message: registration_sessions(config_data['users']).get(message.chat.id, {}).get("state") == "waiting_for_expiration_date")
     @check_user_state()
     async def get_food_expiration_date(message):
         if message.text == "Назад":
@@ -154,9 +158,9 @@ async def handle_messages(bot: AsyncTeleBot):
                 product = user_data["product"]
                 data = read_json()
                 data.append(product)
-                write_json(fridge, data, True)
+                write_json(config_data['fridge'], data, True)
                 await bot.send_message(message.chat.id, "Продукт успешно сохранен!", reply_markup=start_markup)
-                products_stream.on_next(read_json(users)[message.chat.id].get("product_id"), "registered")
+                products_stream.on_next(read_json(config_data['users'])[message.chat.id].get("product_id"), "registered")
         elif message.text == "Сброс":
             await bot.send_message(message.chat.id, "Данные сброшены.", reply_markup=start_markup)
 
@@ -169,7 +173,7 @@ async def handle_messages(bot: AsyncTeleBot):
         if product and product["user_id"] == message.from_user.id:
             # Завершаем регистрацию
             product["status"] = "registered"
-            write_json(new_products, product["status"])
+            write_json(config_data['new_products'], product["status"])
             products_stream.on_next((product_id, "registered"))
 
             # Отправляем пользователю сообщение о завершении
@@ -193,7 +197,7 @@ async def handle_messages(bot: AsyncTeleBot):
         else:
             registration_sessions["product"]["name"] = message.text
             registration_sessions["state"] = "waiting_for_categories"
-            cats = find_categories_fuzzy(message.text, dishes)
+            cats = find_categories_fuzzy(message.text, config_data['dishes'])
             registration_sessions['product']['categories'] = cats
             
             await bot.send_message(message.chat.id, f"Для продукта {message.text} автоматически определены следующие категории: {cats}. Их можно определить самому (напечатав через запятую и отправив), а можно оставить как есть (кнопка Пропустить)", reply_markup=back_skip_markup)

@@ -1,6 +1,6 @@
 import json
 import threading
-from .helpers import check_if_correct_data
+from helpers import check_if_correct_data
 LOCK = threading.Lock()
 
 def write_json(file, data, need_check_datetime_format = False):
