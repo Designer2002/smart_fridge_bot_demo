@@ -1,8 +1,7 @@
 import datetime
 from telebot.async_telebot import AsyncTeleBot
-from utils.helpers import add_new_weight_change, find_categories_fuzzy, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food
+from utils.helpers import add_new_weight_change, find_categories_fuzzy, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food, check_user_state
 from bot.markups import back_skip_markup, create_product_markup, start_markup, drop_markup, admin_markup
-from utils.helpers import check_user_state
 from utils.database import read_json, write_json
 from callbacks import calendar, calendar_1
 from event_handlers import products_stream, interactive_state

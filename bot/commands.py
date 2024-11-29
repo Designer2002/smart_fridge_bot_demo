@@ -3,7 +3,7 @@ from telebot.async_telebot import AsyncTeleBot
 async def register_commands(bot: AsyncTeleBot):
     from data_loaders import config_data
     from markups import admin_markup, start_markup
-    from my_utils.database import read_json, write_json
+    from utils.database import read_json, write_json
     @bot.message_handler(commands=["start"])
     async def send_welcome(message):
         user_id = str(message.from_user.id)

@@ -50,6 +50,6 @@ def clear_user_state(file,user_id):
 
 # Загружаем сессии при старте
 def load_registration_sessions():
-    from my_utils.data_loaders import config_data
+    from .data_loaders import config_data
     global registration_sessions
     registration_sessions = read_json(config_data['sessions_file'])

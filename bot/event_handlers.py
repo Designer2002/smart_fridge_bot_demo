@@ -1,17 +1,17 @@
 import datetime
 import signal
 from rx import operators as ops
-from my_utils.database import read_json, write_json
+from utils.database import read_json, write_json
 import config
 from editors import edit_product_message
-from my_utils.helpers import notify_and_delete_expired_product
+from utils.helpers import notify_and_delete_expired_product
 from rx.subject import Subject, BehaviorSubject
-import my_utils.data_loaders
+import utils.data_loaders
 import message_handler
 
 
 shutdown_stream = Subject()
-interactive_state = BehaviorSubject(my_utils.data_loaders.initial_state)
+interactive_state = BehaviorSubject(utils.data_loaders.initial_state)
 user_start_events = BehaviorSubject({})
 products_stream = Subject()
 
@@ -39,7 +39,7 @@ products_stream.pipe(
 interactive_state.pipe(
     ops.distinct_until_changed()  # Реагируем только на изменение
 ).subscribe(
-    lambda state: write_json(my_utils.data_loaders.config_data['interactive'], f"interactive_started : {state}")
+    lambda state: write_json(utils.data_loaders.config_data['interactive'], f"interactive_started : {state}")
 )
 
 def handle_shutdown_signal(signal_number, frame):
@@ -47,7 +47,7 @@ def handle_shutdown_signal(signal_number, frame):
     
 shutdown_stream.pipe(
     ops.distinct_until_changed()  # Реагируем только на изменение
-).subscribe(lambda _: write_json(my_utils.data_loaders.config_data['sessions_file'], message_handler.registration_sessions))
+).subscribe(lambda _: write_json(utils.data_loaders.config_data['sessions_file'], message_handler.registration_sessions))
 
 signal.signal(signal.SIGINT, handle_shutdown_signal)
 signal.signal(signal.SIGTERM, handle_shutdown_signal)

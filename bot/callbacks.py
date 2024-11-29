@@ -1,6 +1,6 @@
 import datetime
 from telebot.async_telebot import AsyncTeleBot
-from my_utils.database import read_json, write_json
+from utils.database import read_json, write_json
 from markups import back_skip_markup
 
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE

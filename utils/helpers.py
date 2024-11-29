@@ -65,7 +65,7 @@ def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
 def check_user_state(state=True):
     def decorator(bot, func):
         async def wrapper(message, *args, **kwargs):
-            from my_utils.database import read_json
+            from utils.database import read_json
             user_data = read_json()  # Читаем данные пользователей из файла
             user_id = str(message.from_user.id)  # Приводим идентификатор пользователя к строке
             if user_id in user_data:
@@ -87,7 +87,7 @@ def check_if_correct_data(data):
     return data
 
 def notify_and_delete_expired_product(product_id, product):
-    from my_utils.database import write_json
+    from utils.database import write_json
     if product:
         # Удаляем продукт из хранилища
         
@@ -100,7 +100,7 @@ def notify_and_delete_expired_product(product_id, product):
 def add_new_weight_change(weight, chat_id):
     from config import new_products
     from event_handlers import products_stream
-    from my_utils.database import read_json, write_json
+    from utils.database import read_json, write_json
     product_id = str(uuid.uuid4())
     timestamp = datetime.datetime.now()
     products = read_json(new_products)
@@ -140,7 +140,7 @@ async def start_adding_food(bot, message):
 
 async def notify_others_about_product(bot, product_id, registering_user_id):
         from config import new_products, users
-        from my_utils.database import read_json
+        from utils.database import read_json
         product = read_json(new_products).get(product_id)
         if not product:
             return  # Продукт уже удален или не существует
@@ -189,11 +189,11 @@ def create_config():
     config['DEFAULT'] = {
         'admin_id': '699861867',
         'bot_token': "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
-        'sessions_file': 'registration_sessions.json',
+        'sessions_file': 'data/registration_sessions.json',
         'fridge': 'data/fridge_data.json',
         'users': 'data/users.json',
         'new_products': 'data/new_products.json',
-        'interactive': 'state.json',
+        'interactive': 'data/state.json',
         'dishes': 'data/dishes.txt'
     }
     
