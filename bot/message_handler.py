@@ -151,7 +151,7 @@ async def handle_messages(bot: AsyncTeleBot):
     async def suggest_food(message):
         await bot.send_message(message.chat.id, "Эта функция пока не реализована. В будущем вы сможете увидеть рекомендации, что приготовить.")
 
-    @bot.message_handler(func=lambda message: my_utils.data_loaders.storage_tmp.get(message.from_user.id, {}).get('state') == "waiting_for_expiration_date")
+    @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]['state'].startswith("waiting_for_expiration_date"))
     @check_user_state(bot)
     async def get_food_expiration_date(message):
         if message.text == "Назад":
@@ -175,7 +175,7 @@ async def handle_messages(bot: AsyncTeleBot):
             await bot.send_message(message.chat.id, "Введите срок хранения в днях или нажмите 'Пропустить'.")
 
 
-    @bot.message_handler(func=lambda message: my_utils.data_loaders.storage_tmp.get(message.from_user.id, {}).get('state') == "final_check")
+    @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]['state'].startswith("final_check"))
     @check_user_state(bot)
     async def finalize_product(message):
         if message.text == "Сохранить":
@@ -224,11 +224,11 @@ async def handle_messages(bot: AsyncTeleBot):
             await bot.send_message(message.chat.id, "Выберите действие:", reply_markup=start_markup)
             return 
         else:
-            s = load_storage_tmp()[product]
-            s["name"] = message.text
+            s = load_storage_tmp()
+            s[product]["name"] = message.text
             user_data['state'] = "waiting_for_categories"
             cats = find_categories_fuzzy(message.text, config_data['dishes'])
-            s['categories'] = cats
+            s[product]['categories'] = cats
             save_storage_tmp(s)
             write_json(config_data['users'], user_data)
 

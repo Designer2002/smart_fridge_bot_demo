@@ -128,8 +128,8 @@ def add_new_weight_change(weight, chat_id, message_id):
 async def start_adding_food(bot, message, need_msg=True):
     from database import save_storage_tmp, load_storage_tmp
     product_id = str(uuid.uuid4())  # Уникальный ID
-    s = load_storage_tmp()[str(product_id)]
-    s = {
+    s = load_storage_tmp()
+    s[str(product_id)] = {
             "name": "",
             "categories" : [],
             "weight": 0,  # По умолчанию

@@ -1,7 +1,4 @@
-import sys
-
-sys.path.append("my_utils")
-
+import os
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
 from commands import register_commands

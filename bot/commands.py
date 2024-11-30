@@ -20,8 +20,8 @@ async def register_commands(bot: AsyncTeleBot):
                 "username": username or "Без ника",
                 "state": "new_user"
             }
-            s = load_storage_tmp()[message.chat.id]
-            s = user_data
+            s = load_storage_tmp()
+            s[message.chat.id] = user_data
             save_storage_tmp(s)
             write_json(config_data['users'], user_data)
 

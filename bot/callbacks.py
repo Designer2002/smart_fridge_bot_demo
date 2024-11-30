@@ -1,7 +1,7 @@
 import datetime
 from telebot.async_telebot import AsyncTeleBot
 
-from my_utils.database import read_json, write_json
+from my_utils.database import read_json, write_json, save_storage_tmp, load_storage_tmp
 from markups import back_skip_markup
 
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
@@ -78,7 +78,9 @@ async def handle_callbacks(bot: AsyncTeleBot):
             
             if action == "DAY":
                 chosen_date = datetime.date(int(year), int(month), int(day))
-                my_utils.data_loaders.storage_tmp[searched]["manufacture_date"] = chosen_date
+                s = load_storage_tmp()
+                s[searched]["manufacture_date"] = chosen_date
+                save_storage_tmp(s)
                 write_json(my_utils.data_loaders.config_data['events'], "waiting_for_expiration_date")
                 await bot.send_message(call.message.chat.id, f"Выбрана дата: {chosen_date}. Укажите срок хранения (дни) или нажмите 'Пропустить':", reply_markup=back_skip_markup)
         except Exception as e:
