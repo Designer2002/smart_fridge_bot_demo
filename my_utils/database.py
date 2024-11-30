@@ -1,13 +1,13 @@
 import json
 import threading
-from .helpers import check_if_correct_data
+import my_utils.helpers
 LOCK = threading.Lock()
 
 def write_json(file, data, need_check_datetime_format = False):
     try:
         # Преобразуем все даты в строки формата ISO ЕСЛИ НАДО
         if need_check_datetime_format:
-            check_if_correct_data(data)
+            my_utils.helpers.check_if_correct_data(data)
         # Сохраняем JSON
         with open(file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
@@ -49,7 +49,10 @@ def clear_user_state(file,user_id):
         write_json(file, states)
 
 # Загружаем сессии при старте
-def load_registration_sessions():
-    from .data_loaders import config_data
-    global registration_sessions
-    registration_sessions = read_json(config_data['sessions_file'])
+def load_storage_tmp():
+    from data_loaders import config_data
+    return read_json(config_data['storage_tmp']) 
+
+def save_storage_tmp(data):
+    from data_loaders import config_data
+    write_json(config_data['storage_tmp'], data)

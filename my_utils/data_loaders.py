@@ -1,7 +1,7 @@
-from utils.database import load_registration_sessions, read_json
+import my_utils.database
 from rx.subject import Subject, BehaviorSubject
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
-from utils.helpers import create_config, read_config
+import my_utils.helpers
 
 def create_dish_categories(filename):
     dish_categories = {}
@@ -18,22 +18,16 @@ def create_dish_categories(filename):
                 dish_categories[dish_name] = {"all_info": all_info, "categories": categories}
     return dish_categories
 
-create_config()
-config_data = read_config()
+my_utils.helpers.create_config()
+config_data = my_utils.helpers.read_config()
 
 dish_categories = create_dish_categories(config_data['dishes'])
 
-initial_state = read_json(config_data['interactive']).get("interactive_started", False)
+initial_state = my_utils.database.read_json(config_data['interactive']).get("interactive_started", False)
 
-load_registration_sessions()
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
 calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
-
-
-
-# Временное хранилище для незавершенных регистраций
-registration_sessions = {}
 
 # Rx Stream для управления сигналами и событиями
 shutdown_stream = Subject()
@@ -43,4 +37,6 @@ interactive_state = BehaviorSubject(initial_state)
 # Поток событий для отслеживания нажатий команды /start
 user_start_events = BehaviorSubject({})
 products_stream = Subject()
+
+
 

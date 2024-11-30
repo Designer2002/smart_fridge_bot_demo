@@ -9,6 +9,8 @@ from bot.editors import edit_product_message
 from bot.emoji import CATEGORY_NAMES, CATEGORY_EMOJIS
 from bot.markups import back_skip_markup, check_markup
 
+SEPARATOR = " &AMOGUS& "
+
 def find_emoji_fuzzy(dish_name, threshold=70):
     flat_category_names = []
     category_map = {}
@@ -32,7 +34,6 @@ def stem_text(text):
 
 def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
     # Пройдем по всем блюдам и используем fuzzywuzzy для поиска наиболее похожих
-    stemmer = RussianStemmer()
     stemmed_dish_name = stem_text(dish_name)
     matches = process.extract(
         stemmed_dish_name,
@@ -62,19 +63,25 @@ def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
 
     return []
 
-def check_user_state(state=True):
-    def decorator(bot, func):
+def check_user_state(bot, state=True):
+    def decorator(func):
         async def wrapper(message, *args, **kwargs):
-            from utils.database import read_json
-            user_data = read_json()  # Читаем данные пользователей из файла
+            from my_utils.database import read_json
+            from my_utils.data_loaders import config_data
+
+            # Читаем данные пользователей из файла
+            user_data = read_json(config_data['users'])
             user_id = str(message.from_user.id)  # Приводим идентификатор пользователя к строке
+
+            # Проверяем, существует ли пользователь и соответствует ли его статус
             if user_id in user_data:
                 if user_data[user_id].get('enabled') == state:
-                    return func(message, *args, **kwargs)  # Выполняем основную функцию
+                    return await func(message, *args, **kwargs)  # Добавляем await перед вызовом функции
                 else:
                     await bot.send_message(message.chat.id, "Ваш аккаунт не активирован.")
             else:
                 await bot.send_message(message.chat.id, "Пока не нажмёте /start, работать не будет.")
+        
         return wrapper
     return decorator
 
@@ -86,8 +93,8 @@ def check_if_correct_data(data):
             product["expiry_date"] = product["expiry_date"].isoformat()
     return data
 
-def notify_and_delete_expired_product(product_id, product):
-    from utils.database import write_json
+def notify_and_delete_expired_product(bot, product_id, product):
+    from my_utils.database import write_json
     if product:
         # Удаляем продукт из хранилища
         
@@ -95,52 +102,51 @@ def notify_and_delete_expired_product(product_id, product):
         write_json(product)
 
         # Редактируем сообщение об этом продукте
-        edit_product_message(product_id, "💤 Уже неактуально - прошло слишком много времени")
+        edit_product_message(bot, product_id, "💤 Уже неактуально - прошло слишком много времени")
 
-def add_new_weight_change(weight, chat_id):
-    from config import new_products
+def add_new_weight_change(weight, chat_id, message_id):
     from event_handlers import products_stream
-    from utils.database import read_json, write_json
+    from my_utils.database import read_json, write_json
+    from my_utils.data_loaders import config_data
     product_id = str(uuid.uuid4())
-    timestamp = datetime.datetime.now()
-    products = read_json(new_products)
-    if products is None:
-        products = {}
-    products[product_id] = {
+    events = read_json(config_data['events'])
+    if events is None:
+        events = {}
+    events[product_id] = {
+        "state": "waiting",  # waiting, in_progress, registered
+        "chat_id": chat_id, #to update
         "weight": weight,
-        "status": "waiting",  # waiting, in_progress, registered
-        "user_id": None,
-        "timestamp": timestamp,
-        "message_id": None,  # ID сообщения для обновления
-        "chat_id": chat_id
+        "message_id" : message_id,
+        "timestamp" : datetime.datetime.now().isoformat()
     }
-    write_json(new_products, products)
+    write_json(config_data['events'], events)
     products_stream.on_next((product_id, "waiting"))
 
     return product_id
 
 # Добавление нового продукта
-async def start_adding_food(bot, message):
-    from message_handler import registration_sessions
+async def start_adding_food(bot, message, need_msg=True):
+    from database import save_storage_tmp, load_storage_tmp
     product_id = str(uuid.uuid4())  # Уникальный ID
-    registration_sessions[message.chat.id] = {
-        "state": "waiting_for_name",
-        "product": {
-            "id": product_id,
+    s = load_storage_tmp()[str(product_id)]
+    s = {
             "name": "",
             "categories" : [],
             "weight": 0,  # По умолчанию
             "tare_weight": 0,  # По умолчанию
             "source": "Магазин",  # По умолчанию
             "manufacture_date": datetime.date.today(),  # По умолчанию - сегодня
-            "expiry_date": None,
+            "expiry_date": None
         }
-    }
-    await bot.send_message(message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
+    save_storage_tmp(s)
+
+    if need_msg:
+        await bot.send_message(message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
+    return product_id
 
 async def notify_others_about_product(bot, product_id, registering_user_id):
         from config import new_products, users
-        from utils.database import read_json
+        from my_utils.database import read_json
         product = read_json(new_products).get(product_id)
         if not product:
             return  # Продукт уже удален или не существует
@@ -189,12 +195,12 @@ def create_config():
     config['DEFAULT'] = {
         'admin_id': '699861867',
         'bot_token': "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
-        'sessions_file': 'data/registration_sessions.json',
         'fridge': 'data/fridge_data.json',
         'users': 'data/users.json',
-        'new_products': 'data/new_products.json',
         'interactive': 'data/state.json',
-        'dishes': 'data/dishes.txt'
+        'dishes': 'data/dishes.txt',
+        'events' : "data/events.json",
+        "storage_tmp" : 'data/storage_tmp.json'
     }
     
     # Записываем конфигурацию в файл
@@ -212,3 +218,16 @@ def read_config():
     config_data = dict(config['DEFAULT'])
 
     return config_data
+
+def find_user_with_correct_state(id, state):
+    from data_loaders import config_data
+    from database import read_json
+    try:
+        users = read_json(config_data['users'])
+        user = users[str(id)]
+        if user:
+            return user['state'] == state
+        else:
+            return False
+    except Exception as e:
+        print(e)

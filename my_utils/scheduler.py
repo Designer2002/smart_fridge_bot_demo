@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import date
-from utils.database import read_json, write_json
+from my_utils.database import read_json, write_json
 
 def run_scheduler(bot):
     scheduler = AsyncIOScheduler()

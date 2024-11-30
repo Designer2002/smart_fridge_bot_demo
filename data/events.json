@@ -1,0 +1,121 @@
+{
+    "ecb9fbf8-2e99-4312-823e-2d91d7919c4a": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 808,
+        "message_id": 1567,
+        "timestamp": "2024-11-29T23:58:44.546982"
+    },
+    "848e116c-c818-4d36-9648-0225db266ed2": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 530,
+        "message_id": 1576,
+        "timestamp": "2024-11-30T00:06:26.526376"
+    },
+    "d5b62272-1e13-48fb-bb7c-1333b8f33e94": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 237,
+        "message_id": 1585,
+        "timestamp": "2024-11-30T00:08:39.700905"
+    },
+    "b2607406-dce7-4ab3-bce8-a74e37125084": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 390,
+        "message_id": 1594,
+        "timestamp": "2024-11-30T00:12:45.260777"
+    },
+    "5fc05a40-6ba8-4361-b4d6-34124a99959d": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 463,
+        "message_id": 1603,
+        "timestamp": "2024-11-30T00:14:49.202564"
+    },
+    "dc11a779-3556-4b02-bf69-344d8b684165": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 386,
+        "message_id": 1610,
+        "timestamp": "2024-11-30T13:16:48.525790"
+    },
+    "c45a8248-1b87-4bea-b659-14551a71d190": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 645,
+        "message_id": 1618,
+        "timestamp": "2024-11-30T13:27:15.220756"
+    },
+    "2aed817d-492e-4622-b446-2b9d9367aacc": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 1076,
+        "message_id": 1627,
+        "timestamp": "2024-11-30T13:37:40.269263"
+    },
+    "80d5e5af-3eec-4fa0-8d0d-f94e3400b512": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 924,
+        "message_id": 1636,
+        "timestamp": "2024-11-30T13:50:45.490947"
+    },
+    "f12286eb-3446-45d1-ac56-a05137f0730c": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 941,
+        "message_id": 1645,
+        "timestamp": "2024-11-30T13:52:59.893197"
+    },
+    "f26371f0-aa42-4dc1-903e-88dd0f748f29": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 138,
+        "message_id": 1654,
+        "timestamp": "2024-11-30T13:54:08.802136"
+    },
+    "f19ef056-b7b5-452d-b25e-99901f7ea2f9": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 203,
+        "message_id": 1668,
+        "timestamp": "2024-11-30T15:14:05.615653"
+    },
+    "65894354-1365-4b7c-a1f2-a74d025d5c73": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 609,
+        "message_id": 1678,
+        "timestamp": "2024-11-30T15:32:17.285422"
+    },
+    "42b8ad6d-3120-4d45-9a1b-5ae4b2aaacf9": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 669,
+        "message_id": 1681,
+        "timestamp": "2024-11-30T15:32:29.277911"
+    },
+    "fc07f8e7-c2c8-4d18-9d27-8ed88e43411f": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 845,
+        "message_id": 1689,
+        "timestamp": "2024-11-30T16:14:07.170665"
+    },
+    "df1d034c-c8cf-447f-b0e9-701754f8b9a0": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 583,
+        "message_id": 1697,
+        "timestamp": "2024-11-30T16:15:04.065161"
+    },
+    "b549e6b2-4e40-4d09-a813-5d1a85accb93": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 1072,
+        "message_id": 1705,
+        "timestamp": "2024-11-30T16:16:27.942744"
+    }
+}

@@ -1,2 +1,2 @@
 bot
-utils
+my_utils

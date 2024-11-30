@@ -1,9 +1,10 @@
 from telebot import types
 def create_product_markup(product_id):
+    from my_utils.helpers import SEPARATOR
     markup = types.InlineKeyboardMarkup()
     button = types.InlineKeyboardButton(
         text="Зарегистрировать продукт",
-        callback_data=f"register:{product_id}"
+        callback_data=f"register:" + SEPARATOR + product_id
     )
     markup.add(button)
     return markup

@@ -1,17 +1,22 @@
+import sys
+
+sys.path.append("my_utils")
+
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
 from commands import register_commands
 from message_handler import handle_messages
 from callbacks import handle_callbacks
-from utils.data_loaders import config_data
+import my_utils.data_loaders
+from event_handlers import initialize_streams
 
-bot = AsyncTeleBot(config_data['bot_token'])
+bot = AsyncTeleBot(my_utils.data_loaders.config_data['bot_token'])
 
-
+initialize_streams(bot)
  
 async def main():
     from event_handlers import shutdown_stream
-    from utils.scheduler import run_scheduler
+    from my_utils.scheduler import run_scheduler
     try:
         # Регистрируем обработчики
         await register_commands(bot)

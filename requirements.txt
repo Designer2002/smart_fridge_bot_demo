@@ -10,6 +10,8 @@ certifi==2024.8.30
 charset-normalizer==3.4.0
 click==8.1.7
 colorama==0.4.6
+config==0.5.1
+config-py==0.1.1
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
 frozenlist==1.5.0

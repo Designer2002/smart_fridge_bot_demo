@@ -1,7 +1,7 @@
 {
     "python.analysis.extraPaths": [
-        "./bot",
+        "./bot/",
         "./",
-        "./utils"
+        "./my_utils/"
     ]
 }

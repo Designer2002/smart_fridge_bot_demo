@@ -13,6 +13,8 @@ Requires-Dist: certifi==2024.8.30
 Requires-Dist: charset-normalizer==3.4.0
 Requires-Dist: click==8.1.7
 Requires-Dist: colorama==0.4.6
+Requires-Dist: config==0.5.1
+Requires-Dist: config-py==0.1.1
 Requires-Dist: Flask==3.0.3
 Requires-Dist: Flask-SQLAlchemy==3.1.1
 Requires-Dist: frozenlist==1.5.0
