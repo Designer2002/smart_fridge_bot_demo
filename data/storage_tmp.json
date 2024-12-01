@@ -1,27 +1,14 @@
 {
     "6007890245": {
         "chat_id": 6007890245,
-        "message_id": 2921,
-        "product_id": "05cb3ced-bae0-4445-867b-ff17c0c4824a"
+        "message_id": 3128,
+        "product_id": "cf1f58d8-e5a3-4ff6-ac25-29d8205c9ab1"
     },
-    "746d76f0-7e9f-498f-9190-3b90808bcb7b": {},
-    "de99339a-5c59-4ac1-90c8-b93fddbde04f": {
-        "name": "Шашлык",
-        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
-        "weight": 400,
-        "tare_weight": 0,
-        "source": "Даня",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-06T00:00:00"
+    "1314696810": {
+        "chat_id": 1314696810,
+        "message_id": 3129,
+        "product_id": "cf1f58d8-e5a3-4ff6-ac25-29d8205c9ab1"
     },
-    "35ce3848-5f4b-46bd-9081-fd3344b6ba69": {
-        "name": "Шашлык",
-        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
-        "weight": 1400,
-        "tare_weight": 0,
-        "source": "Марина",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-05T00:00:00"
-    },
-    "d3cac16f-2786-41e8-9774-b13c9159eb2e": {}
+    "dbca1409-b402-4d87-8dd9-f7870e6e9e22": {},
+    "540228eb-36ad-41c6-8ec6-8ea34256ca6d": {}
 }

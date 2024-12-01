@@ -1,1 +1,44 @@
-{}
+{
+    "b788c763-8109-4078-a336-16c180e1a8f7": {
+        "state": "in_progress",
+        "chat_id": 6007890245,
+        "weight": 570,
+        "message_id": 3063,
+        "timestamp": "2024-12-01T23:54:09.463379"
+    },
+    "895a1d77-1a0f-48a0-ba59-e1bb17263343": {
+        "state": "in_progress",
+        "chat_id": 1314696810,
+        "weight": 911,
+        "message_id": 3093,
+        "timestamp": "2024-12-01T23:57:05.620325"
+    },
+    "772b7db9-90b2-4cf6-94d4-1ee00fb96eec": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 0,
+        "message_id": 3115,
+        "timestamp": "2024-12-01T23:58:48.951897"
+    },
+    "540228eb-36ad-41c6-8ec6-8ea34256ca6d": {
+        "state": "in_progress",
+        "chat_id": 6007890245,
+        "weight": 251,
+        "message_id": 3123,
+        "timestamp": "2024-12-02T00:17:38.403275"
+    },
+    "dbca1409-b402-4d87-8dd9-f7870e6e9e22": {
+        "state": "in_progress",
+        "chat_id": 1314696810,
+        "weight": 274,
+        "message_id": 3123,
+        "timestamp": "2024-12-02T00:17:38.799553"
+    },
+    "cf1f58d8-e5a3-4ff6-ac25-29d8205c9ab1": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 965,
+        "message_id": 3123,
+        "timestamp": "2024-12-02T00:17:39.151788"
+    }
+}

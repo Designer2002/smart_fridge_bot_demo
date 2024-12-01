@@ -1,7 +1,7 @@
 import json
 import threading
 import my_utils.helpers
-LOCK = threading.Lock()
+
 
 def write_json(file, data, need_check_datetime_format = False):
     try:
@@ -51,6 +51,17 @@ def read_json(file):
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Ошибка в json: {e}")
         return {}
+    
+def read_json_array_fridge(file):
+    try:
+        with open(file, "r", encoding="utf-8") as f:
+            d = json.load(f)
+            if not isinstance(d, list):
+                d = json.loads(d)
+            return d
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Ошибка в json: {e}")
+        return []
 
 def set_user_state(file, user_id, state):
     states = read_json(file)

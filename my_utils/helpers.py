@@ -108,7 +108,7 @@ def add_new_weight_change(weight, chat_id, message_id):
     from event_handlers import products_stream
     from my_utils.database import read_json, write_json
     from my_utils.data_loaders import config_data
-    product_id = id
+    product_id = chat_id
     events = read_json(config_data["events"])
     if events is None:
         events = {}

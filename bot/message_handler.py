@@ -1,11 +1,12 @@
 import datetime
 import random
 import traceback
+import uuid
 from telebot.async_telebot import AsyncTeleBot
 from data_loaders import create_dish_categories
 from my_utils.helpers import add_new_weight_change, find_categories_fuzzy, find_user_with_correct_state, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food, check_user_state, start_adding_food_msg
 from markups import back_skip_markup, create_eating_markup, create_product_markup, start_markup, drop_markup, admin_markup, eat_markup
-from my_utils.database import append_json, read_json, write_json
+from my_utils.database import append_json, read_json, read_json_array_fridge, write_json
 from callbacks import calendar, calendar_1
 from event_handlers import products_stream, interactive_state
 
@@ -90,9 +91,9 @@ async def handle_messages(bot: AsyncTeleBot):
             }
 
             # Читаем базу холодильника и добавляем новый продукт
-            fridge_data = read_json(config_data["fridge"])
+            fridge_data = read_json_array_fridge(config_data["fridge"])
             fridge_data.append(new_product)
-            write_json(config_data["fridge"], fridge_data)
+            append_json(config_data["fridge"], fridge_data)
 
             # Отправляем сообщение об успешном добавлении
             msg = (
@@ -144,7 +145,7 @@ async def handle_messages(bot: AsyncTeleBot):
                 users[user_id]["state"] = "dropping_food"
                 write_json(config_data["users"], users)
             
-    @bot.message_handler(func=lambda message: find_user_with_correct_state(message.from_user.id, "dropping_food") and message.text.isdigit())
+    @bot.message_handler(func=lambda message: read_json(config_data["users"])[str(message.chat.id)]["state"].startswith("dropping_food") and message.text.isdigit())
     @check_user_state(bot)
     async def drop_food(message):
         #print(message.chat.id, " -> message.chat.id")
@@ -154,12 +155,15 @@ async def handle_messages(bot: AsyncTeleBot):
             user_data = read_json(config_data['users'])
             user_ids = [int(user_id) for user_id in user_data.keys()]
 
+            
+
             # Исключаем регистрирующего пользователя
             user_ids = [user_id for user_id in user_ids if user_id != message.from_user.id]
             num = int(message.text)
             for _ in range(num):
+                sender_id = str(uuid.uuid4()) #TMP!!!
                 random_weight = get_random_weight(100,1100)
-                product_id = add_new_weight_change(random_weight, message.chat.id, message.message_id)
+                product_id = add_new_weight_change(random_weight, sender_id, message.message_id)
                 msg = (
                 "📦 ***Обнаружен новый продукт!***\n\n"
                 f"📊 **Вес продукта:** {random_weight} г\n"
@@ -209,7 +213,7 @@ async def handle_messages(bot: AsyncTeleBot):
     @check_user_state(bot)
     async def eat_product_start(message):
         # Получаем данные из холодильника
-        fridge_data = read_json(config_data["fridge"])
+        fridge_data = read_json_array_fridge(config_data["fridge"])
         if not fridge_data:
             await bot.send_message(message.chat.id, "В холодильнике нет продуктов. Кушать нечего!")
             return
@@ -217,10 +221,10 @@ async def handle_messages(bot: AsyncTeleBot):
         markup = create_eating_markup(fridge_data)
         users = read_json(config_data["users"])
         users[str(message.chat.id)]["state"] = "eating"
-        write_json(users)
+        write_json(config_data['users'], users)
         await bot.send_message(message.chat.id, "Выберите продукт, который хотите съесть:", reply_markup=markup)
 
-    @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]["state"] == "eating" and (message.text in [p["name"] for p in read_json(config_data["fridge_"])] or message.text == "Назад"))
+    @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]["state"] == "eating" and (message.text in [p["name"] for p in read_json_array_fridge(config_data["fridge_"])] or message.text == "Назад"))
     @check_user_state(bot)
     async def choose_product(message):
         if message.text == "Назад":
@@ -265,9 +269,9 @@ async def handle_messages(bot: AsyncTeleBot):
             return
 
         # Удаляем продукт из холодильника
-        fridge_data = read_json(config_data["fridge"])
+        fridge_data = read_json_array_fridge(config_data["fridge"])
         fridge_data = [p for p in fridge_data if p["name"] != product_name]
-        write_json(config_data["fridge"], fridge_data)
+        append_json(config_data["fridge"], fridge_data)
 
         # Формируем сообщение
         if message.text == "Съесть анонимно":

@@ -9,6 +9,12 @@
         "enabled": true,
         "display_name": "Лидия",
         "username": "Без ника",
+        "state": "eating"
+    },
+    "1314696810": {
+        "enabled": true,
+        "display_name": "Даниииил Огурцов",
+        "username": "Sin_boy_danya",
         "state": "start"
     }
 }

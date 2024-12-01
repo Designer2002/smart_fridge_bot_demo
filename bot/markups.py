@@ -30,8 +30,19 @@ eat_markup.add("Съесть", "Съесть анонимно", "Назад")
 
 def create_eating_markup(fridge_data):
     from my_utils.data_loaders import eating_products
-    markup = types.InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    markup = types.InlineKeyboardMarkup()
     for product in fridge_data:
         if product["name"] not in eating_products:  # Проверяем, свободен ли продукт
-            markup.add(types.KeyboardButton(product["name"]))
-    markup.add(types.KeyboardButton("Назад"))
+            markup.add(
+                types.InlineKeyboardButton(
+                    text=product["name"], 
+                    callback_data=f"eat_{product['name']}"  # Уникальный идентификатор для каждой кнопки
+                )
+            )
+    markup.add(
+        types.InlineKeyboardButton(
+            text="Назад", 
+            callback_data="go_back"  # Идентификатор для кнопки "Назад"
+        )
+    )
+    return markup
