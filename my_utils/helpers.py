@@ -32,7 +32,7 @@ def stem_text(text):
     stemmer = RussianStemmer()
     return stemmer.stem(text)
 
-def find_categories_fuzzy(dish_name, dish_categories, threshold=70, limit=5):
+def find_categories_fuzzy(dish_name, dish_categories, threshold=60, limit=5):
     # Пройдем по всем блюдам и используем fuzzywuzzy для поиска наиболее похожих
     stemmed_dish_name = stem_text(dish_name)
     matches = process.extract(
@@ -70,12 +70,12 @@ def check_user_state(bot, state=True):
             from my_utils.data_loaders import config_data
 
             # Читаем данные пользователей из файла
-            user_data = read_json(config_data['users'])
+            user_data = read_json(config_data["users"])
             user_id = str(message.from_user.id)  # Приводим идентификатор пользователя к строке
 
             # Проверяем, существует ли пользователь и соответствует ли его статус
             if user_id in user_data:
-                if user_data[user_id].get('enabled') == state:
+                if user_data[user_id].get("enabled") == state:
                     return await func(message, *args, **kwargs)  # Добавляем await перед вызовом функции
                 else:
                     await bot.send_message(message.chat.id, "Ваш аккаунт не активирован.")
@@ -109,7 +109,7 @@ def add_new_weight_change(weight, chat_id, message_id):
     from my_utils.database import read_json, write_json
     from my_utils.data_loaders import config_data
     product_id = str(uuid.uuid4())
-    events = read_json(config_data['events'])
+    events = read_json(config_data["events"])
     if events is None:
         events = {}
     events[product_id] = {
@@ -119,13 +119,31 @@ def add_new_weight_change(weight, chat_id, message_id):
         "message_id" : message_id,
         "timestamp" : datetime.datetime.now().isoformat()
     }
-    write_json(config_data['events'], events)
+    write_json(config_data["events"], events)
     products_stream.on_next((product_id, "waiting"))
 
     return product_id
 
 # Добавление нового продукта
-async def start_adding_food(bot, message, need_msg=True):
+async def start_adding_food(bot, call, need_msg=True):
+    from database import save_storage_tmp, load_storage_tmp
+    product_id = call.data.split(SEPARATOR)[-1]  # Уникальный ID
+    s = load_storage_tmp()
+    s[str(product_id)] = {
+            "name": "",
+            "categories" : [],
+            "weight": 0,  # По умолчанию
+            "tare_weight": 0,  # По умолчанию
+            "source": 'Магазин',  # По умолчанию
+            "manufacture_date": datetime.date.today().isoformat(),  # По умолчанию - сегодня
+            "expiry_date": None
+        }
+    save_storage_tmp(s)
+
+    if need_msg:
+        await bot.send_message(call.message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
+
+async def start_adding_food_msg(bot, message, need_msg=True):
     from database import save_storage_tmp, load_storage_tmp
     product_id = str(uuid.uuid4())  # Уникальный ID
     s = load_storage_tmp()
@@ -134,8 +152,8 @@ async def start_adding_food(bot, message, need_msg=True):
             "categories" : [],
             "weight": 0,  # По умолчанию
             "tare_weight": 0,  # По умолчанию
-            "source": "Магазин",  # По умолчанию
-            "manufacture_date": datetime.date.today(),  # По умолчанию - сегодня
+            "source": 'Магазин',  # По умолчанию
+            "manufacture_date": datetime.date.today().isoformat(),  # По умолчанию - сегодня
             "expiry_date": None
         }
     save_storage_tmp(s)
@@ -144,15 +162,16 @@ async def start_adding_food(bot, message, need_msg=True):
         await bot.send_message(message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
     return product_id
 
+
 async def notify_others_about_product(bot, product_id, registering_user_id):
-        from config import new_products, users
         from my_utils.database import read_json
-        product = read_json(new_products).get(product_id)
+        from data_loaders import config_data
+        product = read_json(config_data['storage_tmp']).get(product_id)
         if not product:
             return  # Продукт уже удален или не существует
 
         # Читаем список всех пользователей
-        user_data = read_json(users)
+        user_data = read_json(config_data['users'])
         user_ids = [int(user_id) for user_id in user_data.keys()]
 
         # Исключаем регистрирующего пользователя
@@ -173,18 +192,14 @@ def get_random_weight(a,b):
 def get_summary(product, category_emoji, title):
     return (
         title,
-        f"📌 **Название:** {product['name']}\n"
-        f"{category_emoji} **Категория:** {product['categories']}\n"
-        f"⚖️ **Вес:** {product['weight']} г\n"
-        f"📦 **Вес тары:** {product['tare_weight']} г\n"
-        f"🏷️ **Источник (кто приготовил):** {product['source']}\n"
-        f"📅 **Дата изготовления:** {product['manufacture_date'].strftime('%d.%m.%Y')}\n"
-        f"⏳ **Годен до:** {product['expiry_date'].strftime('%d.%m.%Y')}\n"
+        f"📌 **Название:** {product["name"]}\n{category_emoji} **Категория:** {product["categories"]}\n⚖️ **Вес:** {product["weight"]} г\n📦 **Вес тары:** {product["tare_weight"]} г\n🏷️ **Источник (кто приготовил):** {product["source"]}\n📅 **Дата изготовления:** {datetime.datetime.fromisoformat(product["manufacture_date"]).strftime("%d.%m.%Y")}\n⏳ **Годен до:** {datetime.datetime.fromisoformat(product["expiry_date"]).strftime("%d.%m.%Y")}\n"
     )
 
 async def send_product_summary(bot, chat_id, product):
-    category_emoji = find_emoji_fuzzy(product["categories"])
-    summary = get_summary(product,category_emoji, title="📝 **Проверьте данные продукта:**\n")
+    from database import load_storage_tmp
+    s = load_storage_tmp()
+    category_emoji = find_emoji_fuzzy(s[product]["categories"])
+    summary = get_summary(s[product],category_emoji, title="📝 **Проверьте данные продукта:**\n")
     await bot.send_message(chat_id, summary, parse_mode="Markdown", reply_markup=check_markup)
 
 def create_config():
@@ -192,19 +207,19 @@ def create_config():
     config = configparser.ConfigParser()
     
     # Добавляем данные без секций
-    config['DEFAULT'] = {
-        'admin_id': '699861867',
-        'bot_token': "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
-        'fridge': 'data/fridge_data.json',
-        'users': 'data/users.json',
-        'interactive': 'data/state.json',
-        'dishes': 'data/dishes.txt',
-        'events' : "data/events.json",
-        "storage_tmp" : 'data/storage_tmp.json'
+    config["DEFAULT"] = {
+        "admin_id": "699861867",
+        "bot_token": "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
+        "fridge": "data/fridge_data.json",
+        "users": "data/users.json",
+        "interactive": "data/state.json",
+        "dishes": "data/dishes.txt",
+        "events" : "data/events.json",
+        "storage_tmp" : "data/storage_tmp.json"
     }
     
     # Записываем конфигурацию в файл
-    with open('config.ini', 'w') as configfile:
+    with open("config.ini", "w") as configfile:
         config.write(configfile)
 
 def read_config():
@@ -212,10 +227,10 @@ def read_config():
     config = configparser.ConfigParser()
 
     # Читаем конфигурацию из файла
-    config.read('config.ini')
+    config.read("config.ini")
 
     # Преобразуем данные в словарь
-    config_data = dict(config['DEFAULT'])
+    config_data = dict(config["DEFAULT"])
 
     return config_data
 
@@ -223,10 +238,10 @@ def find_user_with_correct_state(id, state):
     from data_loaders import config_data
     from database import read_json
     try:
-        users = read_json(config_data['users'])
+        users = read_json(config_data["users"])
         user = users[str(id)]
         if user:
-            return user['state'] == state
+            return user["state"] == state
         else:
             return False
     except Exception as e:

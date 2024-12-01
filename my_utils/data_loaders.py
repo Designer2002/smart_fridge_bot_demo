@@ -5,10 +5,10 @@ import my_utils.helpers
 
 def create_dish_categories(filename):
     dish_categories = {}
-    with open(filename, 'r', encoding='utf-8') as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
-            # Убираем лишние пробелы и разделяем строку по ';'
-            row = line.strip().split(';')
+            # Убираем лишние пробелы и разделяем строку по ";"
+            row = line.strip().split(";")
             if len(row) == 3:
                 dish_name = row[0].strip()  # Название блюда
                 categories = row[1].strip()  # Категории
@@ -21,13 +21,13 @@ def create_dish_categories(filename):
 my_utils.helpers.create_config()
 config_data = my_utils.helpers.read_config()
 
-dish_categories = create_dish_categories(config_data['dishes'])
+dish_categories = create_dish_categories(config_data["dishes"])
 
-initial_state = my_utils.database.read_json(config_data['interactive']).get("interactive_started", False)
+initial_state = my_utils.database.read_json(config_data["interactive"]).get("interactive_started", False)
 
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
-calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
+calendar_1 = CallbackData("calendar_1", "action", "year", "month", "day")
 
 # Rx Stream для управления сигналами и событиями
 shutdown_stream = Subject()

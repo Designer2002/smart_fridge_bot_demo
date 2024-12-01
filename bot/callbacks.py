@@ -7,7 +7,7 @@ from markups import back_skip_markup
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
-calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
+calendar_1 = CallbackData("calendar_1", "action", "year", "month", "day")
 
 async def handle_callbacks(bot: AsyncTeleBot):
     from helpers import SEPARATOR, start_adding_food
@@ -19,7 +19,7 @@ async def handle_callbacks(bot: AsyncTeleBot):
         try:
             print(call.data)
             # Загружаем события
-            events = read_json(my_utils.data_loaders.config_data['events'])
+            events = read_json(my_utils.data_loaders.config_data["events"])
             uuid = call.data.split(SEPARATOR)[-1]
             
             # Проверяем, существует ли продукт
@@ -42,16 +42,16 @@ async def handle_callbacks(bot: AsyncTeleBot):
             events[uuid] = searched_state  # Вносим изменения обратно в общий словарь
             
             # Сохраняем изменения в JSON
-            write_json(my_utils.data_loaders.config_data['events'], events)
+            write_json(my_utils.data_loaders.config_data["events"], events)
             
             # Генерируем событие
             products_stream.on_next((uuid, "in_progress", call.message.message_id))
 
-            users = read_json(my_utils.data_loaders.config_data['users'])
+            users = read_json(my_utils.data_loaders.config_data["users"])
             
-            id = await start_adding_food(bot, call.message, False)
-            users[str(searched_state['chat_id'])]['state'] = 'waiting_for_name' + SEPARATOR + str(id)
-            write_json(my_utils.data_loaders.config_data['users'], users)
+            await start_adding_food(bot, call, False)
+            users[str(searched_state["chat_id"])]["state"] = "waiting_for_name" + SEPARATOR + str(uuid)
+            write_json(my_utils.data_loaders.config_data["users"], users)
             # Отправляем сообщение пользователю
             await bot.send_message(
                 call.message.chat.id,
@@ -66,11 +66,14 @@ async def handle_callbacks(bot: AsyncTeleBot):
     
     @bot.callback_query_handler(func=lambda call: call.data.startswith(calendar_1.prefix))
     async def get_food_manufacture_date(call):
+        from my_utils.data_loaders import config_data
         try:
-            uuid = call.data.split(SEPARATOR)[-1]
-            events = read_json(my_utils.data_loaders.config_data['events'])
-            searched = {e for e in events['id'] if e == uuid} 
-            if not searched or searched["state"] != "waiting_for_manufacture_date":
+            
+            s = load_storage_tmp()
+            u = read_json(config_data['users'])
+            uuid = u[str(call.message.chat.id)]['state'].split(SEPARATOR)[-1]
+            searched = u[str(call.message.chat.id)]
+            if not searched or not searched["state"].startswith("waiting_for_manufacture_date"):
                 await bot.send_message(call.message.chat.id, "Ошибка: вы не в процессе добавления продукта.")
                 return
 
@@ -79,9 +82,10 @@ async def handle_callbacks(bot: AsyncTeleBot):
             if action == "DAY":
                 chosen_date = datetime.date(int(year), int(month), int(day))
                 s = load_storage_tmp()
-                s[searched]["manufacture_date"] = chosen_date
+                u[str(call.message.chat.id)]["state"] = "waiting_for_expiration_date"+SEPARATOR+uuid
+                s[str(uuid)]["manufacture_date"] = chosen_date.isoformat()
                 save_storage_tmp(s)
-                write_json(my_utils.data_loaders.config_data['events'], "waiting_for_expiration_date")
+                write_json(config_data['users'],u)
                 await bot.send_message(call.message.chat.id, f"Выбрана дата: {chosen_date}. Укажите срок хранения (дни) или нажмите 'Пропустить':", reply_markup=back_skip_markup)
         except Exception as e:
             print(e)

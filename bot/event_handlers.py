@@ -17,7 +17,7 @@ products_stream = Subject()
 
 # Поток событий для удаления устаревших продуктов
 products_stream.pipe(
-    ops.map(lambda event: (event[0], read_json(my_utils.data_loaders.config_data['events']).get(event[0]))),  
+    ops.map(lambda event: (event[0], read_json(my_utils.data_loaders.config_data["events"]).get(event[0]))),  
     ops.filter(lambda event: event[1] is not None),
     ops.filter(lambda event: (datetime.datetime.now() - datetime.datetime.fromisoformat(event[1]["timestamp"])).total_seconds() > 86400),
 ).subscribe(
@@ -46,7 +46,7 @@ def initialize_streams(bot):
 interactive_state.pipe(
     ops.distinct_until_changed()  # Реагируем только на изменение
 ).subscribe(
-    lambda state: write_json(my_utils.data_loaders.config_data['interactive'], {"interactive_started" : state}))
+    lambda state: write_json(my_utils.data_loaders.config_data["interactive"], {"interactive_started" : state}))
 
 
 #def handle_shutdown_signal(signal_number, frame):
@@ -54,7 +54,7 @@ interactive_state.pipe(
     
 #shutdown_stream.pipe(
     #ops.distinct_until_changed()  # Реагируем только на изменение
-#).subscribe(lambda _: write_json(my_utils.data_loaders.config_data['sessions_file'], data_loaders.registration_sessions))
+#).subscribe(lambda _: write_json(my_utils.data_loaders.config_data["sessions_file"], data_loaders.registration_sessions))
 
 #signal.signal(signal.SIGINT, handle_shutdown_signal)
 #signal.signal(signal.SIGTERM, handle_shutdown_signal)

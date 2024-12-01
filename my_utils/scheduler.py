@@ -13,7 +13,7 @@ def run_scheduler(bot):
         for product in expired_products:
             await bot.send_message(
                 product["chat_id"], 
-                f"Продукт {product['name']} просрочен! Удаляем."
+                f'Продукт {product["name"]} просрочен! Удаляем.'
             )
             data.remove(product)
         write_json("data/fridge_data.json", data)

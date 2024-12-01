@@ -1,1 +1,83 @@
-{}
+{
+    "53bc35a4-4370-40f0-9f58-c5651ed038ba": {
+        "name": "Колбаса",
+        "categories": "Мясное блюдо, закуска",
+        "weight": 187,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "e883d086-4d34-4989-aef0-b5d985b479bc": {
+        "name": "Молоко",
+        "categories": "Молочный продукт, кисломолочный",
+        "weight": 416,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "50fa9ef7-a779-4d79-9a9e-7268af7571bc": {
+        "name": "Сосиски",
+        "categories": "Молочный продукт, сыр твердый",
+        "weight": 130,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "a9091933-6f36-4681-8eed-cbe8f6427bbf": {
+        "name": "Сыр",
+        "categories": "Завтрак, русская кухня, десерт",
+        "weight": 360,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "0b2eecbe-0ebb-4bd1-b858-ae2f70a3a970": {
+        "name": "Круассан",
+        "categories": "Десерт, завтрак, выпечка, закуска",
+        "weight": 172,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "aeffa1f5-87f1-4562-be7a-9bfbf654edeb": {
+        "name": "Сало",
+        "categories": "Закуска, итальянская кухня, овощное блюдо",
+        "weight": 503,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "4be7c150-1de9-4900-80b1-721494edd0ed": {
+        "name": "Колбаса",
+        "categories": "Мясное блюдо, закуска",
+        "weight": 264,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    },
+    "18172e9c-816e-4a13-ab21-f3e2a48f71ee": {
+        "name": "",
+        "categories": [],
+        "weight": 0,
+        "tare_weight": 0,
+        "source": "Магазин",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": null
+    },
+    "123224a3-74b0-4d41-a98c-0398e6680db8": {
+        "name": "Колбаса",
+        "categories": "Мясное блюдо, закуска",
+        "weight": 422,
+        "tare_weight": 0,
+        "source": "Таджик",
+        "manufacture_date": "2024-12-01",
+        "expiry_date": "2024-12-04T00:00:00"
+    }
+}

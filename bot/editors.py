@@ -3,7 +3,7 @@ async def edit_product_message(bot, product_id, new_text, msg_id):
     from markups import create_product_markup
     from my_utils.data_loaders import config_data
     # Чтение JSON
-    events = read_json(config_data['events'])
+    events = read_json(config_data["events"])
     
     # Проверяем, существует ли продукт
     if events and product_id in events:
@@ -21,7 +21,7 @@ async def edit_product_message(bot, product_id, new_text, msg_id):
         try:
             old_text = (
                 "📦 ***Обнаружен новый продукт!***\n\n"
-                f"📊 **Вес продукта:** {product_data['weight']} г\n"
+                f'📊 **Вес продукта:** {product_data["weight"]} г\n'
                 "❓ Кто-то положил это в холодильник, но мы пока не знаем, что это.\n\n"
                 "👇 Нажмите кнопку ниже, чтобы зарегистрировать этот продукт.")
             

@@ -1,4 +1,7 @@
-import os
+import sys
+sys.path.append("my_utils")
+
+
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
 from commands import register_commands
@@ -7,7 +10,7 @@ from callbacks import handle_callbacks
 import my_utils.data_loaders
 from event_handlers import initialize_streams
 
-bot = AsyncTeleBot(my_utils.data_loaders.config_data['bot_token'])
+bot = AsyncTeleBot(my_utils.data_loaders.config_data["bot_token"])
 
 initialize_streams(bot)
  

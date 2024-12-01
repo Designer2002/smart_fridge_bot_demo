@@ -51,8 +51,8 @@ def clear_user_state(file,user_id):
 # Загружаем сессии при старте
 def load_storage_tmp():
     from data_loaders import config_data
-    return read_json(config_data['storage_tmp']) 
+    return read_json(config_data["storage_tmp"]) 
 
 def save_storage_tmp(data):
     from data_loaders import config_data
-    write_json(config_data['storage_tmp'], data)
+    write_json(config_data["storage_tmp"], data)

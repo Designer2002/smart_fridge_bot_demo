@@ -20,7 +20,7 @@ drop_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 drop_markup.add("1", "3", "5", "10", "15", "20")
 
 back_skip_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-back_skip_markup.add("Назад", "Пропустить")
+back_skip_markup.add("Назад", 'Пропустить')
 
 check_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 check_markup.add("Сохранить", "Сброс")
