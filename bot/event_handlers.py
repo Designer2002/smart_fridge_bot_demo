@@ -2,22 +2,22 @@ import asyncio
 import datetime
 import signal
 from rx import operators as ops
-from my_utils.database import read_json, write_json
+from database import read_json, write_json
 from editors import edit_product_message
-from my_utils.helpers import notify_and_delete_expired_product
+from helpers import notify_and_delete_expired_product
 from rx.subject import Subject, BehaviorSubject
-import my_utils.data_loaders
+import data_loaders
 
 
 shutdown_stream = Subject()
-interactive_state = BehaviorSubject(my_utils.data_loaders.initial_state)
+interactive_state = BehaviorSubject(data_loaders.initial_state)
 user_start_events = BehaviorSubject({})
 products_stream = Subject()
 
 
 # Поток событий для удаления устаревших продуктов
 products_stream.pipe(
-    ops.map(lambda event: (event[0], read_json(my_utils.data_loaders.config_data["events"]).get(event[0]))),  
+    ops.map(lambda event: (event[0], read_json(data_loaders.config_data["events"]).get(event[0]))),  
     ops.filter(lambda event: event[1] is not None),
     ops.filter(lambda event: (datetime.datetime.now() - datetime.datetime.fromisoformat(event[1]["timestamp"])).total_seconds() > 86400),
 ).subscribe(
@@ -46,7 +46,7 @@ def initialize_streams(bot):
 interactive_state.pipe(
     ops.distinct_until_changed()  # Реагируем только на изменение
 ).subscribe(
-    lambda state: write_json(my_utils.data_loaders.config_data["interactive"], {"interactive_started" : state}))
+    lambda state: write_json(data_loaders.config_data["interactive"], {"interactive_started" : state}))
 
 
 #def handle_shutdown_signal(signal_number, frame):
@@ -54,7 +54,7 @@ interactive_state.pipe(
     
 #shutdown_stream.pipe(
     #ops.distinct_until_changed()  # Реагируем только на изменение
-#).subscribe(lambda _: write_json(my_utils.data_loaders.config_data["sessions_file"], data_loaders.registration_sessions))
+#).subscribe(lambda _: write_json(data_loaders.config_data["sessions_file"], data_loaders.registration_sessions))
 
 #signal.signal(signal.SIGINT, handle_shutdown_signal)
 #signal.signal(signal.SIGTERM, handle_shutdown_signal)

@@ -2,9 +2,9 @@ import os
 
 
 async def edit_product_message(bot, product_id, new_text):
-    from my_utils.database import read_json, load_storage_tmp
+    from database import read_json, load_storage_tmp
     from markups import create_product_markup
-    from my_utils.data_loaders import config_data
+    from data_loaders import config_data
     import traceback
 
     print(f"Редактирование продукта с ID: {product_id}")

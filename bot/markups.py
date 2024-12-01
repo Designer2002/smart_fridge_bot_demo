@@ -1,6 +1,6 @@
 from telebot import types
 def create_product_markup(product_id):
-    from my_utils.helpers import SEPARATOR
+    from helpers import SEPARATOR
     markup = types.InlineKeyboardMarkup()
     button = types.InlineKeyboardButton(
         text="Зарегистрировать продукт",
@@ -29,7 +29,7 @@ eat_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=T
 eat_markup.add("Съесть", "Съесть анонимно", "Назад")
 
 def create_eating_markup(fridge_data):
-    from my_utils.data_loaders import eating_products
+    from data_loaders import eating_products
     markup = types.InlineKeyboardMarkup()
     for product in fridge_data:
         if product["name"] not in eating_products:  # Проверяем, свободен ли продукт
