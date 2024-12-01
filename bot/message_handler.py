@@ -63,7 +63,7 @@ async def handle_messages(bot: AsyncTeleBot):
             write_json(config_data["users"], user_data)
             await bot.send_message(message.chat.id, "Выберите действие:", reply_markup=start_markup)
 
-    @bot.message_handler(func=lambda message: message.text == "Добавить рандомный продукт" and str(message.from_user.id) == config_data["admin_id"])
+    @bot.message_handler(func=lambda message: message.text == "Рандомный продукт" and str(message.from_user.id) == config_data["admin_id"])
     @check_user_state(bot)
     async def add_random_product(message):
         try:
@@ -76,7 +76,7 @@ async def handle_messages(bot: AsyncTeleBot):
             random_weight = random.randint(200, 1000)  # Вес продукта в граммах
             tare_weight = 0  # Вес тары
             source = "Загадка..."  # Кто приготовил
-            manufacture_date = datetime.date.today()+datetime.timedelta(days=random.randint(-7, 0)).isoformat()  # Сегодняшняя дата
+            manufacture_date = (datetime.date.today()+datetime.timedelta(days=random.randint(-7, 0))).isoformat()  # Сегодняшняя дата
             expiry_date = (datetime.date.today() + datetime.timedelta(days=5)).isoformat()  # Плюс 5 дней
 
             # Формируем данные для добавления
@@ -91,9 +91,8 @@ async def handle_messages(bot: AsyncTeleBot):
             }
 
             # Читаем базу холодильника и добавляем новый продукт
-            fridge_data = read_json_array_fridge(config_data["fridge"])
-            fridge_data.append(new_product)
-            append_json(config_data["fridge"], fridge_data)
+            
+            append_json(config_data["fridge"], new_product)
 
             # Отправляем сообщение об успешном добавлении
             msg = (
@@ -106,10 +105,17 @@ async def handle_messages(bot: AsyncTeleBot):
                 f"📅 **Дата изготовления:** {manufacture_date}\n"
                 f"⏳ **Годен до:** {expiry_date}"
             )
-            await bot.send_message(message.chat.id, msg, parse_mode="Markdown")
-
+            user_data = read_json(config_data['users'])
+            user_ids = [int(user_id) for user_id in user_data.keys()]
+            user_ids = [user_id for user_id in user_ids if user_id != message.chat.id]
+            for user_id in user_ids:
+                try:
+                    await bot.send_message(user_id, msg)
+            
+                except Exception as e:
+                    print(f"Ошибка при добавлении продукта: {e}")
         except Exception as e:
-            await bot.send_message(message.chat.id, f"Ошибка при добавлении продукта: {e}")
+                    print(f"Обосрамс: {e}")
 
     @bot.message_handler(func=lambda message: message.text == "Сообщение от датчика веса")
     @check_user_state(bot)
@@ -223,29 +229,6 @@ async def handle_messages(bot: AsyncTeleBot):
         users[str(message.chat.id)]["state"] = "eating"
         write_json(config_data['users'], users)
         await bot.send_message(message.chat.id, "Выберите продукт, который хотите съесть:", reply_markup=markup)
-
-    @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]["state"] == "eating" and (message.text in [p["name"] for p in read_json_array_fridge(config_data["fridge_"])] or message.text == "Назад"))
-    @check_user_state(bot)
-    async def choose_product(message):
-        if message.text == "Назад":
-            await bot.send_message(message.chat.id, "Вы вернулись в главное меню.", reply_markup=start_markup)
-            return
-
-        product_name = message.text
-        if product_name in eating_products:
-            await bot.send_message(message.chat.id, f"Продукт {product_name} уже ест другой пользователь.")
-            return
-
-        # Занимаем продукт
-        eating_products[product_name] = message.chat.id
-
-        # Показываем варианты съедения
-
-        await bot.send_message(
-            message.chat.id,
-            f"Вы выбрали {product_name}. Что хотите сделать?",
-            reply_markup=eat_markup,
-        )
     
     @bot.message_handler(func=lambda message: read_json(config_data['users'])[str(message.chat.id)]["state"] == "eating" and message.text in ["Съесть", "Съесть анонимно", "Назад"])
     @check_user_state(bot)
@@ -271,14 +254,16 @@ async def handle_messages(bot: AsyncTeleBot):
         # Удаляем продукт из холодильника
         fridge_data = read_json_array_fridge(config_data["fridge"])
         fridge_data = [p for p in fridge_data if p["name"] != product_name]
-        append_json(config_data["fridge"], fridge_data)
+        write_json(config_data["fridge"], fridge_data)
+
+        user_data = read_json(config_data["users"])
 
         # Формируем сообщение
         if message.text == "Съесть анонимно":
             notify_msg = f"Кто-то втихаря съедает {product_name}!"
         else:
-            user_data = read_json(config_data["users"])
-            user_name = user_data[str(user_id)]["name"]
+            
+            user_name = user_data[str(user_id)]["display_name"]
             notify_msg = f"{user_name} съедает {product_name}!"
 
         # Уведомляем всех
@@ -294,7 +279,7 @@ async def handle_messages(bot: AsyncTeleBot):
         )
         users = read_json(config_data["users"])
         users[str(message.chat.id)]["state"] = "start"
-        write_json(users)
+        write_json(config_data['users'], users)
 
     @bot.message_handler(func=lambda message: message.text == "Посоветуй вкусняшку")
     @check_user_state(bot)

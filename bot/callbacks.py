@@ -1,8 +1,9 @@
 import datetime
 from telebot.async_telebot import AsyncTeleBot
 
-from my_utils.database import read_json, write_json, save_storage_tmp, load_storage_tmp
+from my_utils.database import read_json, write_json, save_storage_tmp, load_storage_tmp, read_json_array_fridge
 from markups import back_skip_markup
+from my_utils.data_loaders import config_data
 
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 
@@ -91,3 +92,41 @@ async def handle_callbacks(bot: AsyncTeleBot):
         except Exception as e:
             print(e)
 
+    @bot.callback_query_handler(func=lambda call: call.data.startswith("eat"))
+    async def choose_product(call):
+        from markups import start_markup, eat_markup
+        from data_loaders import eating_products
+        if call.message.text == "Назад":
+            user_data = read_json(config_data['users'])
+            user_data[str(call.message_chat.id)]['state'] = 'start'
+            write_json(config_data['users'], user_data)
+            await bot.send_message(call.message.chat.id, "Вы вернулись в главное меню.", reply_markup=start_markup)
+            return
+
+        product_name = call.data.split("_")[-1]
+        if product_name in eating_products:
+            await bot.send_message(call.message.chat.id, f"Продукт {product_name} уже ест другой пользователь.")
+            return
+        data = read_json_array_fridge(config_data['fridge'])
+        data = [p for p in data if p["name"] == product_name]
+        if data is None:
+            await bot.send_message(call.message.chat.id, f"Продукт {product_name} уже съеден! Съешьте что-то ещё.")
+            return
+        # Занимаем продукт
+        eating_products[product_name] = call.message.chat.id
+
+        # Показываем варианты съедения
+
+        await bot.send_message(
+            call.message.chat.id,
+            f"Вы выбрали {product_name}. Как его будете есть?",
+            reply_markup=eat_markup,
+        )
+    @bot.callback_query_handler(func=lambda call: call.data.startswith("go_back"))
+    async def choose_product(call):
+        from markups import start_markup
+        user_data = read_json(config_data['users'])
+        user_data[str(call.message.chat.id)]['state'] = 'start'
+        write_json(config_data['users'], user_data)
+        await bot.send_message(call.message.chat.id, "Вы вернулись в главное меню.", reply_markup=start_markup)
+        return

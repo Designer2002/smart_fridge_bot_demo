@@ -3,7 +3,7 @@
         "enabled": true,
         "display_name": "ауф",
         "username": "jane_hetfield",
-        "state": "dropping_food"
+        "state": "start"
     },
     "6007890245": {
         "enabled": true,
@@ -15,6 +15,6 @@
         "enabled": true,
         "display_name": "Даниииил Огурцов",
         "username": "Sin_boy_danya",
-        "state": "start"
+        "state": "eating"
     }
 }

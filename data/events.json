@@ -40,5 +40,40 @@
         "weight": 965,
         "message_id": 3123,
         "timestamp": "2024-12-02T00:17:39.151788"
+    },
+    "66bce729-703d-4d95-939f-77e959963ed1": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 0,
+        "message_id": 3185,
+        "timestamp": "2024-12-02T00:44:26.349398"
+    },
+    "f2e1e6cb-f97c-446b-8082-b1fb30c58a3b": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 206,
+        "message_id": 3244,
+        "timestamp": "2024-12-02T01:00:14.557642"
+    },
+    "80d389f3-0994-46fa-9756-8544017473f0": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 0,
+        "message_id": 3258,
+        "timestamp": "2024-12-02T01:00:51.720628"
+    },
+    "34e56097-ef7b-4ac7-a63c-1002ce9d9267": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 0,
+        "message_id": 3284,
+        "timestamp": "2024-12-02T01:08:44.556988"
+    },
+    "1a30c5bc-4afa-4b5d-90a7-18a996bea51f": {
+        "state": "waiting",
+        "chat_id": "???",
+        "weight": 0,
+        "message_id": 3425,
+        "timestamp": "2024-12-02T01:21:32.328286"
     }
 }

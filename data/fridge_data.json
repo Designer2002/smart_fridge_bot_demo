@@ -1,38 +1,11 @@
 [
     {
-        "name": "Шашлык",
-        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
-        "weight": 400,
+        "name": "Соль!!!!!!!",
+        "categories": "Острые блюда, мясное блюдо, мексиканская кухня",
+        "weight": 0,
         "tare_weight": 0,
-        "source": "Даня",
+        "source": "Магазин",
         "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-06T00:00:00"
-    },
-    {
-        "name": "Шашлык",
-        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
-        "weight": 400,
-        "tare_weight": 0,
-        "source": "Даня",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-06T00:00:00"
-    },
-    {
-        "name": "анус",
-        "categories": "Первое блюдо, овощной суп, русская кухня",
-        "weight": 274,
-        "tare_weight": 300,
-        "source": "мама",
-        "manufacture_date": "2024-12-20",
-        "expiry_date": "2024-12-21T00:00:00"
-    },
-    {
-        "name": "Плов",
-        "categories": "Готовое блюдо, мясное блюдо, гарнир",
-        "weight": 251,
-        "tare_weight": 0,
-        "source": "Я",
-        "manufacture_date": "2024-12-02",
-        "expiry_date": "2024-12-12T00:00:00"
+        "expiry_date": "2024-12-04T00:00:00"
     }
 ]
