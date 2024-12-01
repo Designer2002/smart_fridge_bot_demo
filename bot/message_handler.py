@@ -1,4 +1,5 @@
 import datetime
+import os
 import random
 import traceback
 import uuid
@@ -63,7 +64,7 @@ async def handle_messages(bot: AsyncTeleBot):
             write_json(config_data["users"], user_data)
             await bot.send_message(message.chat.id, "Выберите действие:", reply_markup=start_markup)
 
-    @bot.message_handler(func=lambda message: message.text == "Рандомный продукт" and str(message.from_user.id) == config_data["admin_id"])
+    @bot.message_handler(func=lambda message: message.text == "Рандомный продукт" and str(message.from_user.id) == os.getenv("ADMIN_ID"))
     @check_user_state(bot)
     async def add_random_product(message):
         try:

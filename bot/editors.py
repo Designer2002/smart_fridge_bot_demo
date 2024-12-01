@@ -1,3 +1,6 @@
+import os
+
+
 async def edit_product_message(bot, product_id, new_text):
     from my_utils.database import read_json, load_storage_tmp
     from markups import create_product_markup
@@ -26,7 +29,7 @@ async def edit_product_message(bot, product_id, new_text):
     user_ids = [int(user_id) for user_id in user_data.keys()]
 
     # Исключаем администратора
-    user_ids = [user_id for user_id in user_ids if user_id != int(config_data['admin_id'])]
+    user_ids = [user_id for user_id in user_ids if user_id != int(os.getenv("ADMIN_ID"))]
     print(f"Пользователи для обновления: {user_ids}")
 
     if not user_ids:

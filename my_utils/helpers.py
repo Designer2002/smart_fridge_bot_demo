@@ -233,8 +233,6 @@ def create_config():
     
     # Добавляем данные без секций
     config["DEFAULT"] = {
-        "admin_id": "699861867",
-        "bot_token": "7223871421:AAG2IKwKcGALr5UUYbs15LI9ndd8xpS1FpQ",
         "fridge": "data/fridge_data.json",
         "users": "data/users.json",
         "interactive": "data/state.json",

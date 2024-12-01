@@ -1,3 +1,7 @@
+import os
+
+
+bot_token = os.getenv('BOT_TOKEN')
 import sys
 sys.path.append("my_utils")
 
@@ -10,7 +14,7 @@ from callbacks import handle_callbacks
 import my_utils.data_loaders
 from event_handlers import initialize_streams
 
-bot = AsyncTeleBot(my_utils.data_loaders.config_data["bot_token"])
+bot = AsyncTeleBot(bot_token)
 
 initialize_streams(bot)
  

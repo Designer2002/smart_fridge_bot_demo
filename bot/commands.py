@@ -1,3 +1,4 @@
+import os
 from telebot.async_telebot import AsyncTeleBot
 
 async def register_commands(bot: AsyncTeleBot):
@@ -22,7 +23,7 @@ async def register_commands(bot: AsyncTeleBot):
 
         write_json(config_data["users"], user_data)
 
-        if int(user_id) == int(config_data["admin_id"]):
+        if int(user_id) == int(os.getenv("ADMIN_ID")):
             await bot.send_message(message.chat.id, "Режим админа включен", reply_markup=admin_markup)
         else:
             await bot.send_message(
