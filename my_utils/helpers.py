@@ -78,7 +78,7 @@ def check_user_state(bot, state=True):
                 if user_data[user_id].get("enabled") == state:
                     return await func(message, *args, **kwargs)  # Добавляем await перед вызовом функции
                 else:
-                    await bot.send_message(message.chat.id, "Ваш аккаунт не активирован.")
+                    await bot.send_message(message.chat.id, "Ваш аккаунт не активирован. Нажмите /start")
             else:
                 await bot.send_message(message.chat.id, "Пока не нажмёте /start, работать не будет.")
         
@@ -108,19 +108,19 @@ def add_new_weight_change(weight, chat_id, message_id):
     from event_handlers import products_stream
     from my_utils.database import read_json, write_json
     from my_utils.data_loaders import config_data
-    product_id = str(uuid.uuid4())
+    product_id = id
     events = read_json(config_data["events"])
     if events is None:
         events = {}
     events[product_id] = {
         "state": "waiting",  # waiting, in_progress, registered
-        "chat_id": chat_id, #to update
+        "chat_id": "???", #to update
         "weight": weight,
         "message_id" : message_id,
         "timestamp" : datetime.datetime.now().isoformat()
     }
     write_json(config_data["events"], events)
-    products_stream.on_next((product_id, "waiting"))
+    products_stream.on_next((product_id, "waiting", message_id))
 
     return product_id
 
@@ -144,9 +144,22 @@ async def start_adding_food(bot, call, need_msg=True):
         await bot.send_message(call.message.chat.id, "Введите название продукта:", reply_markup=back_skip_markup)
 
 async def start_adding_food_msg(bot, message, need_msg=True):
-    from database import save_storage_tmp, load_storage_tmp
+    from database import save_storage_tmp, load_storage_tmp, read_json, write_json
+    from data_loaders import config_data
     product_id = str(uuid.uuid4())  # Уникальный ID
+    
     s = load_storage_tmp()
+    events = read_json(config_data["events"])
+    if events is None:
+        events = {}
+    events[product_id] = {
+        "state": "waiting",  # waiting, in_progress, registered
+        "chat_id": "???", #to update
+        "weight": 0,
+        "message_id" : message.message_id,
+        "timestamp" : datetime.datetime.now().isoformat()
+    }
+    write_json(config_data["events"], events)
     s[str(product_id)] = {
             "name": "",
             "categories" : [],
@@ -203,10 +216,15 @@ def get_summary(product, category_emoji, title):
     
 
 async def send_product_summary(bot, chat_id, product):
-    from database import load_storage_tmp
+    from database import load_storage_tmp, read_json,write_json
+    from data_loaders import config_data
     s = load_storage_tmp()
     category_emoji = find_emoji_fuzzy(s[product]["categories"])
     summary = get_summary(s[product],category_emoji, title="📝 **Проверьте данные продукта:**\n\n")
+    
+    user_data = read_json(config_data['users'])
+    user_data[str(chat_id)]["state"] = "final_check"+SEPARATOR+product
+    write_json(config_data['users'], user_data)
     await bot.send_message(chat_id, summary, parse_mode="Markdown", reply_markup=check_markup)
 
 def create_config():

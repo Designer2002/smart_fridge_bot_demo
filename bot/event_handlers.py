@@ -30,7 +30,7 @@ def initialize_streams(bot):
     ops.filter(lambda event: event[1] == "in_progress"),
     ops.filter(lambda event: event[0] is not None),
     ).subscribe(lambda event: asyncio.run_coroutine_threadsafe(
-        edit_product_message(bot, event[0], "UPD: Продукт уже регистрируют.", event[2]),
+        edit_product_message(bot, event[0], "UPD: Продукт уже регистрируют."),
         asyncio.get_event_loop()
     ))
 
@@ -39,7 +39,7 @@ def initialize_streams(bot):
         ops.filter(lambda event: event[1] == "registered"),
         ops.filter(lambda event: event[0] is not None),
     ).subscribe(lambda event: asyncio.run_coroutine_threadsafe(
-        edit_product_message(bot, event[0], "✅ Продукт успешно зарегистрирован!", event[2]),
+        edit_product_message(bot, event[0], "✅ Продукт успешно зарегистрирован!"),
         asyncio.get_event_loop()
     ))
 

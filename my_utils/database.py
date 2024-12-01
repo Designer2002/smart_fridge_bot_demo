@@ -14,6 +14,31 @@ def write_json(file, data, need_check_datetime_format = False):
     except Exception as e:
         print(f"Ошибка записи JSON: {e}")
 
+def append_json(file, new_data):
+    try:
+        # Читаем существующие данные из файла
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = []  # Если файл не найден, начинаем с пустого списка
+
+        # Убедимся, что данные представляют собой массив
+        if not isinstance(data, list):
+            raise ValueError("Существующий JSON должен быть массивом")
+
+        # Добавляем новые данные
+        if isinstance(new_data, list):
+            data.extend(new_data)  # Если новые данные — список, расширяем массив
+        else:
+            data.append(new_data)  # Если новые данные — объект, добавляем в массив
+
+        # Записываем обратно в файл
+        with open(file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Ошибка дописывания в JSON: {e}")
+
 def read_json(file):
     try:
         with open(file, "r", encoding="utf-8") as f:

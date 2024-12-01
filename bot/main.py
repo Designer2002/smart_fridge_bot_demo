@@ -15,7 +15,6 @@ bot = AsyncTeleBot(my_utils.data_loaders.config_data["bot_token"])
 initialize_streams(bot)
  
 async def main():
-    from event_handlers import shutdown_stream
     from my_utils.scheduler import run_scheduler
     try:
         # Регистрируем обработчики
@@ -28,8 +27,6 @@ async def main():
         await bot.infinity_polling()
     except Exception as e:
         print(f"Ошибка: {e}")
-    finally:
-        shutdown_stream.on_next(True)  # Завершаем поток
 
 if __name__ == "__main__":
     asyncio.run(main())

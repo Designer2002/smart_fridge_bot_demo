@@ -39,8 +39,9 @@ async def handle_callbacks(bot: AsyncTeleBot):
 
             # Обновляем статус продукта
             searched_state["state"] = "in_progress"
+            searched_state["chat_id"] = call.message.chat.id
             events[uuid] = searched_state  # Вносим изменения обратно в общий словарь
-            
+           
             # Сохраняем изменения в JSON
             write_json(my_utils.data_loaders.config_data["events"], events)
             

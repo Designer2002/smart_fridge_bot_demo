@@ -38,5 +38,5 @@ interactive_state = BehaviorSubject(initial_state)
 user_start_events = BehaviorSubject({})
 products_stream = Subject()
 
-
+eating_products = {}
 

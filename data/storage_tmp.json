@@ -1,101 +1,27 @@
 {
-    "53bc35a4-4370-40f0-9f58-c5651ed038ba": {
-        "name": "Колбаса",
-        "categories": "Мясное блюдо, закуска",
-        "weight": 187,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
+    "6007890245": {
+        "chat_id": 6007890245,
+        "message_id": 2921,
+        "product_id": "05cb3ced-bae0-4445-867b-ff17c0c4824a"
     },
-    "e883d086-4d34-4989-aef0-b5d985b479bc": {
-        "name": "Молоко",
-        "categories": "Молочный продукт, кисломолочный",
-        "weight": 416,
+    "746d76f0-7e9f-498f-9190-3b90808bcb7b": {},
+    "de99339a-5c59-4ac1-90c8-b93fddbde04f": {
+        "name": "Шашлык",
+        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
+        "weight": 400,
         "tare_weight": 0,
-        "source": "Магазин",
+        "source": "Даня",
         "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
+        "expiry_date": "2024-12-06T00:00:00"
     },
-    "50fa9ef7-a779-4d79-9a9e-7268af7571bc": {
-        "name": "Сосиски",
-        "categories": "Молочный продукт, сыр твердый",
-        "weight": 130,
+    "35ce3848-5f4b-46bd-9081-fd3344b6ba69": {
+        "name": "Шашлык",
+        "categories": "Морепродукты, горячее блюдо, праздничное блюдо",
+        "weight": 1400,
         "tare_weight": 0,
-        "source": "Магазин",
+        "source": "Марина",
         "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
+        "expiry_date": "2024-12-05T00:00:00"
     },
-    "a9091933-6f36-4681-8eed-cbe8f6427bbf": {
-        "name": "Сыр",
-        "categories": "Завтрак, русская кухня, десерт",
-        "weight": 360,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "0b2eecbe-0ebb-4bd1-b858-ae2f70a3a970": {
-        "name": "Круассан",
-        "categories": "Десерт, завтрак, выпечка, закуска",
-        "weight": 172,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "aeffa1f5-87f1-4562-be7a-9bfbf654edeb": {
-        "name": "Сало",
-        "categories": "Закуска, итальянская кухня, овощное блюдо",
-        "weight": 503,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "4be7c150-1de9-4900-80b1-721494edd0ed": {
-        "name": "Колбаса",
-        "categories": "Мясное блюдо, закуска",
-        "weight": 264,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "18172e9c-816e-4a13-ab21-f3e2a48f71ee": {
-        "name": "",
-        "categories": [],
-        "weight": 0,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": null
-    },
-    "123224a3-74b0-4d41-a98c-0398e6680db8": {
-        "name": "Колбаса",
-        "categories": "Мясное блюдо, закуска",
-        "weight": 422,
-        "tare_weight": 0,
-        "source": "Таджик",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "3dc8d9ba-71a7-4b45-b167-26a3560c52a9": {
-        "name": "Шаурма",
-        "categories": "Вегетарианское блюдо, ближневосточная кухня, закуска",
-        "weight": 169,
-        "tare_weight": 0,
-        "source": "Таджик и узбек",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    },
-    "48207501-799e-4353-bb73-948854234c0f": {
-        "name": "Шаурма",
-        "categories": "Вегетарианское блюдо, ближневосточная кухня, закуска",
-        "weight": 0,
-        "tare_weight": 0,
-        "source": "Магазин",
-        "manufacture_date": "2024-12-01",
-        "expiry_date": "2024-12-04T00:00:00"
-    }
+    "d3cac16f-2786-41e8-9774-b13c9159eb2e": {}
 }
