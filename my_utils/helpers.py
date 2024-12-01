@@ -5,9 +5,9 @@ from random import randint
 import uuid
 from fuzzywuzzy import fuzz, process
 from nltk.stem.snowball import RussianStemmer
-from bot.editors import edit_product_message
-from bot.emoji import CATEGORY_NAMES, CATEGORY_EMOJIS
-from bot.markups import back_skip_markup, check_markup
+from editors import edit_product_message
+from emoji import CATEGORY_NAMES, CATEGORY_EMOJIS
+from markups import back_skip_markup, check_markup
 
 SEPARATOR = " &AMOGUS& "
 
