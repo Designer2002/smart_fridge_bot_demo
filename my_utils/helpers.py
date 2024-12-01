@@ -190,16 +190,23 @@ def get_random_weight(a,b):
     return randint(a, b)
 
 def get_summary(product, category_emoji, title):
-    return (
-        title,
-        f"📌 **Название:** {product["name"]}\n{category_emoji} **Категория:** {product["categories"]}\n⚖️ **Вес:** {product["weight"]} г\n📦 **Вес тары:** {product["tare_weight"]} г\n🏷️ **Источник (кто приготовил):** {product["source"]}\n📅 **Дата изготовления:** {datetime.datetime.fromisoformat(product["manufacture_date"]).strftime("%d.%m.%Y")}\n⏳ **Годен до:** {datetime.datetime.fromisoformat(product["expiry_date"]).strftime("%d.%m.%Y")}\n"
-    )
+    msg =""
+    msg +=title
+    msg +=f"📌 **Название:** {product["name"]}\n"
+    msg +=   f'{category_emoji} **Категория:** {product["categories"]}\n'
+    msg +=   f'⚖️ **Вес:** {product["weight"]} г\n'
+    msg +=   f'📦 **Вес тары:** {product["tare_weight"]} г\n'
+    msg +=   f'🏷️ **Источник (кто приготовил):** {product["source"]}\n'
+    msg +=   f'📅 **Дата изготовления:** {datetime.datetime.fromisoformat(product["manufacture_date"]).strftime('%d.%m.%Y')}\n'
+    msg +=   f'⏳ **Годен до:** {datetime.datetime.fromisoformat(product["expiry_date"]).strftime("%d.%m.%Y")}\n'
+    return msg
+    
 
 async def send_product_summary(bot, chat_id, product):
     from database import load_storage_tmp
     s = load_storage_tmp()
     category_emoji = find_emoji_fuzzy(s[product]["categories"])
-    summary = get_summary(s[product],category_emoji, title="📝 **Проверьте данные продукта:**\n")
+    summary = get_summary(s[product],category_emoji, title="📝 **Проверьте данные продукта:**\n\n")
     await bot.send_message(chat_id, summary, parse_mode="Markdown", reply_markup=check_markup)
 
 def create_config():

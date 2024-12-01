@@ -138,5 +138,26 @@
         "weight": 422,
         "message_id": 2212,
         "timestamp": "2024-12-01T16:39:58.324563"
+    },
+    "fff3adbe-a59a-405c-8a01-5fc6cddb2a8d": {
+        "state": "waiting",
+        "chat_id": 699861867,
+        "weight": 916,
+        "message_id": 2234,
+        "timestamp": "2024-12-01T17:14:23.221078"
+    },
+    "881dc995-a89f-4a60-9961-29cedd332315": {
+        "state": "waiting",
+        "chat_id": 699861867,
+        "weight": 264,
+        "message_id": 2234,
+        "timestamp": "2024-12-01T17:14:23.381492"
+    },
+    "3dc8d9ba-71a7-4b45-b167-26a3560c52a9": {
+        "state": "in_progress",
+        "chat_id": 699861867,
+        "weight": 169,
+        "message_id": 2234,
+        "timestamp": "2024-12-01T17:14:23.580458"
     }
 }

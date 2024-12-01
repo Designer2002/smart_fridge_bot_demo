@@ -134,7 +134,7 @@ async def handle_messages(bot: AsyncTeleBot):
     @bot.message_handler(func=lambda message: message.text == "Новый продукт" and read_json(config_data["users"])[str(message.chat.id)]["state"].startswith("start"))
     @check_user_state(bot)
     async def register_product(message):
-        id = start_adding_food_msg(bot, message)
+        id = await start_adding_food_msg(bot, message)
         u = read_json(config_data['users'])
         u[str(message.chat.id)]['state'] = 'waiting_for_name'+SEPARATOR+id
         write_json(config_data['users'], u)
@@ -204,7 +204,7 @@ async def handle_messages(bot: AsyncTeleBot):
                 write_json(config_data["fridge"], data, True)
                 user_data[str(message.chat.id)]["state"] = "start"
                 await bot.send_message(message.chat.id, "Продукт успешно сохранен!", reply_markup=start_markup)
-                products_stream.on_next(read_json(config_data["users"])[str(message.chat.id)].get("product_id"), "registered")
+                products_stream.on_next(read_json(config_data["users"])[str(message.chat.id)].get("product_id"), "registered", )
                 await notify_others_about_product(bot, product,str(message.chat.id))
                 write_json(config_data['users', user_data])
                 s = load_storage_tmp()
