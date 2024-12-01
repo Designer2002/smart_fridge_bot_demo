@@ -1,13 +1,12 @@
 import json
-import threading
-import my_utils.helpers
+import helpers
 
 
 def write_json(file, data, need_check_datetime_format = False):
     try:
         # Преобразуем все даты в строки формата ISO ЕСЛИ НАДО
         if need_check_datetime_format:
-            my_utils.helpers.check_if_correct_data(data)
+            helpers.check_if_correct_data(data)
         # Сохраняем JSON
         with open(file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)

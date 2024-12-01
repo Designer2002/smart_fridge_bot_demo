@@ -66,8 +66,8 @@ def find_categories_fuzzy(dish_name, dish_categories, threshold=60, limit=5):
 def check_user_state(bot, state=True):
     def decorator(func):
         async def wrapper(message, *args, **kwargs):
-            from my_utils.database import read_json
-            from my_utils.data_loaders import config_data
+            from database import read_json
+            from data_loaders import config_data
 
             # Читаем данные пользователей из файла
             user_data = read_json(config_data["users"])
@@ -94,7 +94,7 @@ def check_if_correct_data(data):
     return data
 
 def notify_and_delete_expired_product(bot, product_id, product):
-    from my_utils.database import write_json
+    from database import write_json
     if product:
         # Удаляем продукт из хранилища
         
@@ -106,8 +106,8 @@ def notify_and_delete_expired_product(bot, product_id, product):
 
 def add_new_weight_change(weight, chat_id, message_id):
     from event_handlers import products_stream
-    from my_utils.database import read_json, write_json
-    from my_utils.data_loaders import config_data
+    from database import read_json, write_json
+    from data_loaders import config_data
     product_id = chat_id
     events = read_json(config_data["events"])
     if events is None:
@@ -177,7 +177,7 @@ async def start_adding_food_msg(bot, message, need_msg=True):
 
 
 async def notify_others_about_product(bot, product_id, registering_user_id):
-        from my_utils.database import read_json
+        from database import read_json
         from data_loaders import config_data
         product = read_json(config_data['storage_tmp']).get(product_id)
         if not product:

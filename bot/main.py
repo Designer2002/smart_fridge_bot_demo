@@ -11,7 +11,6 @@ from telebot.async_telebot import AsyncTeleBot
 from commands import register_commands
 from message_handler import handle_messages
 from callbacks import handle_callbacks
-import my_utils.data_loaders
 from event_handlers import initialize_streams
 
 bot = AsyncTeleBot(bot_token)
@@ -19,7 +18,7 @@ bot = AsyncTeleBot(bot_token)
 initialize_streams(bot)
  
 async def main():
-    from my_utils.scheduler import run_scheduler
+    #from my_utils.scheduler import run_scheduler
     try:
         # Регистрируем обработчики
         await register_commands(bot)
@@ -27,7 +26,7 @@ async def main():
         await handle_callbacks(bot)
 
         print("Бот запущен.")
-        run_scheduler(bot)  # Запускаем фоновый планировщик
+        #run_scheduler(bot)  # Запускаем фоновый планировщик
         await bot.infinity_polling()
     except Exception as e:
         print(f"Ошибка: {e}")

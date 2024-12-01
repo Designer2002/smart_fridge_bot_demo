@@ -1,7 +1,7 @@
-import my_utils.database
+import database
 from rx.subject import Subject, BehaviorSubject
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
-import my_utils.helpers
+import helpers
 
 def create_dish_categories(filename):
     dish_categories = {}
@@ -18,12 +18,12 @@ def create_dish_categories(filename):
                 dish_categories[dish_name] = {"all_info": all_info, "categories": categories}
     return dish_categories
 
-my_utils.helpers.create_config()
-config_data = my_utils.helpers.read_config()
+helpers.create_config()
+config_data = helpers.read_config()
 
 dish_categories = create_dish_categories(config_data["dishes"])
 
-initial_state = my_utils.database.read_json(config_data["interactive"]).get("interactive_started", False)
+initial_state = database.read_json(config_data["interactive"]).get("interactive_started", False)
 
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
