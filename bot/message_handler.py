@@ -5,18 +5,18 @@ import traceback
 import uuid
 from telebot.async_telebot import AsyncTeleBot
 from data_loaders import create_dish_categories
-from my_utils.helpers import add_new_weight_change, find_categories_fuzzy, find_user_with_correct_state, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food, check_user_state, start_adding_food_msg
+from helpers import add_new_weight_change, find_categories_fuzzy, find_user_with_correct_state, get_random_weight, notify_others_about_product, send_product_summary, start_adding_food, check_user_state, start_adding_food_msg
 from markups import back_skip_markup, create_eating_markup, create_product_markup, start_markup, drop_markup, admin_markup, eat_markup
-from my_utils.database import append_json, read_json, read_json_array_fridge, write_json
+from database import append_json, read_json, read_json_array_fridge, write_json
 from callbacks import calendar, calendar_1
 from event_handlers import products_stream, interactive_state
 
 
 
 async def handle_messages(bot: AsyncTeleBot):
-    from my_utils.data_loaders import config_data, dish_categories
-    from my_utils.database import load_storage_tmp, save_storage_tmp
-    from my_utils.helpers import SEPARATOR
+    from data_loaders import config_data, dish_categories
+    from database import load_storage_tmp, save_storage_tmp
+    from helpers import SEPARATOR
     from data_loaders import eating_products
     @bot.message_handler(func=lambda message: message.text == "Назад")
     @check_user_state(bot)
