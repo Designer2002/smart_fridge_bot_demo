@@ -13,7 +13,7 @@ from message_handler import handle_messages
 from callbacks import handle_callbacks
 from event_handlers import initialize_streams
 
-bot = AsyncTeleBot(str(bot_token))
+bot = AsyncTeleBot(bot_token)
 
 initialize_streams(bot)
  
