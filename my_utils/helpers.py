@@ -205,7 +205,7 @@ def get_random_weight(a,b):
 def get_summary(product, category_emoji, title):
     msg =""
     msg +=title
-    msg +=f"📌 **Название:** {product["name"]}\n"
+    msg +=f'📌 **Название:** {product["name"]}\n'
     msg +=   f'{category_emoji} **Категория:** {product["categories"]}\n'
     msg +=   f'⚖️ **Вес:** {product["weight"]} г\n'
     msg +=   f'📦 **Вес тары:** {product["tare_weight"]} г\n'
