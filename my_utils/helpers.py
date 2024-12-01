@@ -210,7 +210,7 @@ def get_summary(product, category_emoji, title):
     msg +=   f'⚖️ **Вес:** {product["weight"]} г\n'
     msg +=   f'📦 **Вес тары:** {product["tare_weight"]} г\n'
     msg +=   f'🏷️ **Источник (кто приготовил):** {product["source"]}\n'
-    msg +=   f'📅 **Дата изготовления:** {datetime.datetime.fromisoformat(product["manufacture_date"]).strftime('%d.%m.%Y')}\n'
+    msg +=   f'📅 **Дата изготовления:** {datetime.datetime.fromisoformat(product["manufacture_date"]).strftime("%d.%m.%Y")}\n'
     msg +=   f'⏳ **Годен до:** {datetime.datetime.fromisoformat(product["expiry_date"]).strftime("%d.%m.%Y")}\n'
     return msg
     
