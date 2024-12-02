@@ -63,4 +63,5 @@ async def edit_product_message(bot, product_id, new_text):
             print(f"Сообщение для chat_id={u} успешно обновлено")
         except Exception as e:
             traceback.print_exc()
+            continue 
             print(f"Ошибка при обновлении сообщения для chat_id={u}: {e}")
