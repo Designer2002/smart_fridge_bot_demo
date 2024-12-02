@@ -111,11 +111,10 @@ async def handle_messages(bot: AsyncTeleBot):
             user_ids = [user_id for user_id in user_ids if user_id != message.chat.id]
             for user_id in user_ids:
                 try:
-                    await bot.send_mesage(user_id, msg)
+                    await bot.send_message(user_id, msg)
             
                 except Exception as e:
                     print(f"Ошибка при добавлении продукта: {e}")
-                    continue
         except Exception as e:
                     print(f"Обосрамс: {e}")
 
@@ -181,20 +180,17 @@ async def handle_messages(bot: AsyncTeleBot):
                 message_to_reply = {}
                 markup = create_product_markup(product_id)
                 for u in user_ids:
-                    try:
-                        sent_message = await bot.send_message(u, msg, reply_markup=markup)
-                        message_id = sent_message.message_id  # Получаем ID сообщения
-                        chat_id = u  # Получаем chat_id
+                    sent_message = await bot.send_message(u, msg, reply_markup=markup)
+                    message_id = sent_message.message_id  # Получаем ID сообщения
+                    chat_id = u  # Получаем chat_id
 
                     # Сохраняем в базу данных или передаем в другую функцию
 
-                        message_to_reply[u]={"chat_id" : chat_id,
+                    message_to_reply[u]={"chat_id" : chat_id,
                                          "message_id" : message_id,
                                          "product_id" : product_id}
                                          # Ваш метод сохранения
-                        save_storage_tmp(message_to_reply)
-                    except:
-                        continue 
+                    save_storage_tmp(message_to_reply)
                     
                 
 
@@ -274,10 +270,8 @@ async def handle_messages(bot: AsyncTeleBot):
         # Уведомляем всех
         user_ids = [int(uid) for uid in user_data.keys() if int(uid) != user_id]
         for uid in user_ids:
-            try:
-                await bot.send_message(uid, notify_msg)
-            except:
-                continue 
+            await bot.send_message(uid, notify_msg)
+
         # Освобождаем продукт
         del eating_products[product_name]
 
@@ -301,21 +295,17 @@ async def handle_messages(bot: AsyncTeleBot):
             await go_back(message)
             return
         else:
-            try:
-                if message.text == 'Пропустить':
+            if message.text == 'Пропустить':
                 
-                    user_data = read_json(config_data["users"])
-                    s = load_storage_tmp()
-                    t = datetime.datetime.fromisoformat(s[product]["manufacture_date"]) + datetime.timedelta(days=3) 
-                    t = t.isoformat()
-                    s[product]['expiry_date'] = t
-                    save_storage_tmp(s)
-                    await send_product_summary(bot, message.chat.id, product)
-                
-                    return
-            except:
-                #await send_product_summary(bot, message.chat.id, product)
-                print("something is wrong")
+                user_data = read_json(config_data["users"])
+                s = load_storage_tmp()
+                t = datetime.datetime.fromisoformat(s[product]["manufacture_date"]) + datetime.timedelta(days=3) 
+                t = t.isoformat()
+                s[product]['expiry_date'] = t
+                save_storage_tmp(s)
+                await send_product_summary(bot, message.chat.id, product)
+                user_data[str(message.chat.id)]['state']="final_check"+SEPARATOR+product
+                return
 
         try:
             days = int(message.text)
@@ -327,9 +317,10 @@ async def handle_messages(bot: AsyncTeleBot):
             s[product]['expiry_date'] = t
             save_storage_tmp(s)
             await send_product_summary(bot, message.chat.id, product)
-            
+            user_data[str(message.chat.id)]['state'] = "final_check"+SEPARATOR+product
             
         except ValueError:
+            traceback.print_exc()
             await bot.send_message(message.chat.id, "Введите срок хранения в днях или нажмите 'Пропустить'.")
 
 

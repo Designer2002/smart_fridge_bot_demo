@@ -92,6 +92,8 @@ async def handle_callbacks(bot: AsyncTeleBot):
                 await bot.send_message(call.message.chat.id, f"Выбрана дата: {chosen_date}. Укажите срок хранения (дни) или нажмите 'Пропустить':", reply_markup=back_skip_markup)
         except Exception as e:
             traceback.print_exc()
+            if u[str(call.message.chat.id)] is None:
+                await bot.send_message(call.message.chat.id, "Вас нет в списке пользователей. Нажмите /start")
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith("eat"))
     async def choose_product(call):
