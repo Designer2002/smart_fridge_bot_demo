@@ -185,6 +185,7 @@ async def notify_others_about_product(bot, product_id, registering_user_id):
 
         # Читаем список всех пользователей
         user_data = read_json(config_data['users'])
+        
         user_ids = [int(user_id) for user_id in user_data.keys()]
 
         # Исключаем регистрирующего пользователя
@@ -198,6 +199,7 @@ async def notify_others_about_product(bot, product_id, registering_user_id):
                 await bot.send_message(user_id, product_info)
             except Exception as e:
                 print(f"Не удалось отправить сообщение пользователю {user_id}: {e}")
+                continue
                 
 def get_random_weight(a,b):
     return randint(a, b)
