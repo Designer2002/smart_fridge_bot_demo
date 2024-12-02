@@ -313,9 +313,9 @@ async def handle_messages(bot: AsyncTeleBot):
                     await send_product_summary(bot, message.chat.id, product)
                 
                     return
-                except:
-                    #await send_product_summary(bot, message.chat.id, product)
-                    print("something is wrong")
+            except:
+                #await send_product_summary(bot, message.chat.id, product)
+                print("something is wrong")
 
         try:
             days = int(message.text)
