@@ -301,17 +301,21 @@ async def handle_messages(bot: AsyncTeleBot):
             await go_back(message)
             return
         else:
-            if message.text == 'Пропустить':
+            try:
+                if message.text == 'Пропустить':
                 
-                user_data = read_json(config_data["users"])
-                s = load_storage_tmp()
-                t = datetime.datetime.fromisoformat(s[product]["manufacture_date"]) + datetime.timedelta(days=3) 
-                t = t.isoformat()
-                s[product]['expiry_date'] = t
-                save_storage_tmp(s)
-                await send_product_summary(bot, message.chat.id, product)
+                    user_data = read_json(config_data["users"])
+                    s = load_storage_tmp()
+                    t = datetime.datetime.fromisoformat(s[product]["manufacture_date"]) + datetime.timedelta(days=3) 
+                    t = t.isoformat()
+                    s[product]['expiry_date'] = t
+                    save_storage_tmp(s)
+                    await send_product_summary(bot, message.chat.id, product)
                 
-                return
+                    return
+                except:
+                    #await send_product_summary(bot, message.chat.id, product)
+                    print("something is wrong)
 
         try:
             days = int(message.text)
