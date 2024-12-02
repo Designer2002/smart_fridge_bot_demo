@@ -111,10 +111,11 @@ async def handle_messages(bot: AsyncTeleBot):
             user_ids = [user_id for user_id in user_ids if user_id != message.chat.id]
             for user_id in user_ids:
                 try:
-                    await bot.send_message(user_id, msg)
+                    await bot.send_mesage(user_id, msg)
             
                 except Exception as e:
                     print(f"Ошибка при добавлении продукта: {e}")
+                    continue
         except Exception as e:
                     print(f"Обосрамс: {e}")
 
@@ -180,17 +181,20 @@ async def handle_messages(bot: AsyncTeleBot):
                 message_to_reply = {}
                 markup = create_product_markup(product_id)
                 for u in user_ids:
-                    sent_message = await bot.send_message(u, msg, reply_markup=markup)
-                    message_id = sent_message.message_id  # Получаем ID сообщения
-                    chat_id = u  # Получаем chat_id
+                    try:
+                        sent_message = await bot.send_message(u, msg, reply_markup=markup)
+                        message_id = sent_message.message_id  # Получаем ID сообщения
+                        chat_id = u  # Получаем chat_id
 
                     # Сохраняем в базу данных или передаем в другую функцию
 
-                    message_to_reply[u]={"chat_id" : chat_id,
+                        message_to_reply[u]={"chat_id" : chat_id,
                                          "message_id" : message_id,
                                          "product_id" : product_id}
                                          # Ваш метод сохранения
-                    save_storage_tmp(message_to_reply)
+                        save_storage_tmp(message_to_reply)
+                    except:
+                        continue 
                     
                 
 
@@ -270,8 +274,10 @@ async def handle_messages(bot: AsyncTeleBot):
         # Уведомляем всех
         user_ids = [int(uid) for uid in user_data.keys() if int(uid) != user_id]
         for uid in user_ids:
-            await bot.send_message(uid, notify_msg)
-
+            try:
+                await bot.send_message(uid, notify_msg)
+            except:
+                continue 
         # Освобождаем продукт
         del eating_products[product_name]
 
