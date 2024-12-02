@@ -1,4 +1,5 @@
 import datetime
+import traceback
 from telebot.async_telebot import AsyncTeleBot
 
 from  database import read_json, write_json, save_storage_tmp, load_storage_tmp, read_json_array_fridge
@@ -90,7 +91,7 @@ async def handle_callbacks(bot: AsyncTeleBot):
                 write_json(config_data['users'],u)
                 await bot.send_message(call.message.chat.id, f"Выбрана дата: {chosen_date}. Укажите срок хранения (дни) или нажмите 'Пропустить':", reply_markup=back_skip_markup)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith("eat"))
     async def choose_product(call):

@@ -2,6 +2,7 @@ import configparser
 import datetime
 from functools import lru_cache
 from random import randint
+import traceback
 import uuid
 from fuzzywuzzy import fuzz, process
 from nltk.stem.snowball import RussianStemmer
@@ -269,5 +270,5 @@ def find_user_with_correct_state(id, state):
             return user["state"] == state
         else:
             return False
-    except Exception as e:
-        print(e)
+    except:
+        traceback.print_exc()
